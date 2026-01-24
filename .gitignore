@@ -1,3 +1,5 @@
+debfemail
+debfemail-st
 bin/
 *.crt
 *.key
