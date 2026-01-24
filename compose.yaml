@@ -1,0 +1,62 @@
+networks:
+  internal:
+    enable_ipv4: true
+    enable_ipv6: true
+    driver: macvlan
+    ipam:
+      config:
+        - subnet: 192.168.3.0/24
+          gateway: 192.168.3.1
+services:
+  nameserver:
+    image: localhost/femail_nameserver
+    build: ./nameserver/
+    networks:
+      internal:
+        ipv4_address: 192.168.3.3
+    environment:
+      EXTRA_ARGS: -4
+    ports:
+      - "53:53/udp"
+      - "53:53/tcp"
+      - "953:953/tcp"
+  mailey:
+    image: localhost/femail_mailey_machine
+    hostname: mailey.femail
+    dns: 192.168.3.3
+    build:
+      context: ./femail/debian/
+    networks:
+      internal:
+        ipv4_address: 192.168.3.4
+  rats:
+    image: localhost/femail_rats_machine
+    hostname: rats.femail
+    dns: 192.168.3.3
+    build:
+      context: ./postfix/
+      args:
+        DOMAIN: rats.femail
+    networks:
+      internal:
+        ipv4_address: 192.168.3.5
+  mice:
+    image: localhost/femail_mice_machine
+    hostname: mice.femail
+    dns: 192.168.3.3
+    build:
+      context: ./postfix/
+      args:
+        DOMAIN: mice.femail
+    networks:
+      internal:
+        ipv4_address: 192.168.3.6
+  failey:
+    image: localhost/femail_failey_machine
+    hostname: failey.femail
+    dns: 192.168.3.3
+    build:
+      context: ./femail/scratch/
+    networks:
+      internal:
+        ipv4_address: 192.168.3.7

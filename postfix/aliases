@@ -1,0 +1,3 @@
+postmaster: root
+
+file: /tmp/mail_file

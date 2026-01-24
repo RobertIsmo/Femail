@@ -1,0 +1,14 @@
+from docker.io/debian
+
+run apt update
+run DEBIAN_FRONTEND=noninteractive apt install -y \
+	libasan8 libubsan1 \
+	nano curl mailutils bind9*;
+
+copy ./mail.mailey.femail.key /usr/local/share/ca-certificates/mail.mailey.femail.key
+copy ./mail.mailey.femail.crt /usr/local/share/ca-certificates/mail.mailey.femail.crt
+
+copy ./debfemail /usr/sbin/femail
+
+cmd ["/usr/sbin/femail"]
+

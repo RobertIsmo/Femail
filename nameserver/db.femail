@@ -1,0 +1,24 @@
+$TTL 86400
+@   IN  SOA ns1.femail. admin.femail. (
+        2026012201 ; Serial
+        3600       ; Refresh
+        1800       ; Retry
+        604800     ; Expire
+        86400 )    ; Minimum TTL
+
+    IN  NS  ns1.femail.
+ns1 IN  A   192.168.3.3
+
+mailey IN A 192.168.3.4
+rats   IN A 192.168.3.5
+mice   IN A 192.168.3.6
+failey IN A 192.168.3.7
+mail.mailey IN A 192.168.3.4
+mail.rats   IN A 192.168.3.5
+mail.mice   IN A 192.168.3.6
+mail.failey IN A 192.168.3.7
+
+mailey IN MX 10 mail.mailey.femail.
+rats   IN MX 10 mail.rats.femail.
+mice   IN MX 10 mail.mice.femail.
+failey IN MX 10 mail.failey.femail.

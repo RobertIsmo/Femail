@@ -1,0 +1,8 @@
+from scratch
+
+copy ./mail.failey.femail.key /usr/local/share/ca-certificates/mail.failey.femail.key
+copy ./mail.failey.femail.crt /usr/local/share/ca-certificates/mail.failey.femail.crt
+
+copy ./debfemail-st /usr/sbin/femail
+
+cmd ["/usr/sbin/femail"]

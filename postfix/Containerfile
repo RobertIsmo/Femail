@@ -1,0 +1,19 @@
+from docker.io/debian
+
+run apt update
+run DEBIAN_FRONTEND=noninteractive apt install -y \
+	nano curl postfix mailutils bind9*;
+
+copy ./aliases /etc/aliases
+
+arg DOMAIN
+env DOMAIN=${DOMAIN}
+
+run postconf -e "myhostname=$DOMAIN"; \
+	postconf -e "mydestination=$DOMAIN, localhost"; \
+	postconf -e "mynetworks=192.168.3.0/24,127.0.0.0/8"; \
+	postconf -e "inet_interfaces=all";
+
+run newaliases
+
+cmd ["/usr/sbin/postfix", "start-fg"]

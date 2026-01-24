@@ -1,0 +1,6 @@
+from docker.io/ubuntu/bind9
+
+copy named.conf.local /etc/bind/named.conf.local
+COPY db.femail /etc/bind/db.femail
+
+run chown -R bind:bind /etc/bind
