@@ -6,6 +6,7 @@
 #include "femail.h"
 #include "comm.h"
 #include "master.h"
+#include "dns.h"
 
 #ifndef DEBUG
 #define DEBUG 0
@@ -67,6 +68,15 @@ int main() {
 	if (DEBUG) {
 		log_warn("Running in debugging mode.");
 	}
+
+	if (dns_init() != 0) {
+		log_err("No MAIL_DOMAIN environment variable provided.");
+		return 1;
+	} else {
+		log_info("Running as %s.", get_mail_domain());
+	}
+
+	
 	
 	if(start_smtp(&smtpctx) != 0) {
 		log_crit("failed to start SMTP service.");
