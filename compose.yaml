@@ -24,6 +24,8 @@ services:
     image: localhost/femail_mailey_machine
     hostname: mailey.femail
     dns: 192.168.3.3
+    environment:
+      MAIL_DOMAIN: mail.mailey.femail
     build:
       context: ./femail/debian/
     networks:
@@ -55,6 +57,8 @@ services:
     image: localhost/femail_failey_machine
     hostname: failey.femail
     dns: 192.168.3.3
+    environment:
+      MAIL_DOMAIN: mail.failey.femail
     build:
       context: ./femail/scratch/
     networks:
