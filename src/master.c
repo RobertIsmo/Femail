@@ -1,3 +1,5 @@
+#define _GNU_SOURCE
+#include <stdio.h>
 #include <stdlib.h>
 #include <stddef.h>
 #include <unistd.h>
@@ -60,9 +62,11 @@ int handle_reject(int acceptresult) {
 	case ACCEPT_ERROR: return 1;
 	case ACCEPT_CONTENT:
 		int clientsocket = acceptresult;
-		log_err("unimplemented");
+
+		dprintf(clientsocket, "523 Use SMTPS instead\n");
+		
 		close(clientsocket);
-		return 1;
+		return 0;
 	default:
 		log_emerg("Unexpected accept status. aborting...");
 		abort();
