@@ -1,4 +1,5 @@
 CC := gcc
+CONTAINER_TOOL=podman
 CFLAGS := \
 	-std=c23 -pthread \
 	-Wall -Wextra -Werror -Wpedantic -pedantic-errors \
@@ -28,13 +29,13 @@ all: femail/debian/debfemail \
 	bin/femail bin/femail-st
 
 up: femail/debian/debfemail femail/scratch/debfemail-st femail/debian/mail.mailey.femail.crt all femail/scratch/mail.failey.femail.crt
-	podman-compose up -d --build
+	$(CONTAINER_TOOL)-compose up -d --build
 
 down:
-	podman-compose down
+	$(CONTAINER_TOOL)-compose down -t 3
 
 logs:
-	podman-compose logs --names
+	$(CONTAINER_TOOL)-compose logs --names
 
 femail/debian/debfemail: bin/debfemail
 	install $< $@

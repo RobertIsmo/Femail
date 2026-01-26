@@ -64,3 +64,13 @@ services:
     networks:
       internal:
         ipv4_address: 192.168.3.7
+  mailless:
+    tty: true
+    image: localhost/femail_mailless_machine
+    hostname: mailless.femail
+    dns: 192.168.3.3
+    build:
+      context: ./mailless/
+    networks:
+      internal:
+        ipv4_address: 192.168.3.8

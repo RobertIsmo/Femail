@@ -1,0 +1,5 @@
+from docker.io/debian
+
+run apt update
+run DEBIAN_FRONTEND=noninteractive apt install -y \
+	nano curl netcat-openbsd bind9*;
