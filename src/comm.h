@@ -24,24 +24,4 @@ typedef struct {
 	int socket6;
 } starttlscontext;
 
-void init_smtp(smtpcontext *);
-void init_smtps(smtpscontext *);
-void init_starttls(starttlscontext *);
-
-int start_smtp(smtpcontext *);
-int start_smtps(smtpscontext *);
-int start_starttls(starttlscontext *);
-
-void check_communications(smtpcontext *,
-						  smtpscontext *,
-						  starttlscontext *);
-
-void stop_smtp(smtpcontext *);
-void stop_smtps(smtpscontext *);
-void stop_starttls(starttlscontext *);
-
-extern smtpcontext smtpctx;
-extern smtpscontext smtpsctx;
-extern starttlscontext starttlsctx;
-
 #endif //COMM_H

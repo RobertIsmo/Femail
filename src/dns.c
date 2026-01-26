@@ -4,7 +4,6 @@
 #include <arpa/nameser.h>
 #include <resolv.h>
 #include "femail.h"
-#include "dns.h"
 
 static char maildomain[DOMAIN_MAX_SIZE] = {0};
 

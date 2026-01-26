@@ -8,11 +8,10 @@
 #include <errno.h>
 #include "master.h"
 #include "femail.h"
-#include "comm.h"
 
-MailConnectionQueue mailconnqueue = {0};
+ConnectionQueue connqueue = {0};
 
-int mailconnq_init(MailConnectionQueue * queue) {
+int conn_queue_init(ConnectionQueue * queue) {
 	pthread_mutex_init(&queue->lock,
 					   NULL);
 	queue->count = 0;
@@ -20,10 +19,10 @@ int mailconnq_init(MailConnectionQueue * queue) {
 	queue->tail = 0;
 	memset(queue->data,
 		   0,
-		   MAIL_CONNECTION_QUEUE_CAPACITY * sizeof(MailConnection));
+		   CONNECTION_QUEUE_CAPACITY * sizeof(Connection));
 	return 0;
 }
-size_t mailconnq_count(MailConnectionQueue * queue) {
+size_t conn_queue_count(ConnectionQueue * queue) {
 	if (pthread_mutex_lock(&queue->lock) != 0) {
 		log_alert("Mutex lock failure, system may begin failing.");
 		return 0;
@@ -35,14 +34,14 @@ size_t mailconnq_count(MailConnectionQueue * queue) {
 	}
 	return result;
 }
-int mailconnq_enqueue(MailConnectionQueue * queue,
-					  MailConnection conn) {
+int conn_queue_enqueue(ConnectionQueue * queue,
+					  Connection conn) {
 	if (pthread_mutex_lock(&queue->lock) != 0) {
 		log_alert("Mutex lock failure, system may begin failing.");
 		return 1;
 	}
-	if (queue->count == MAIL_CONNECTION_QUEUE_CAPACITY) {
-		log_err("Mail connection queue filled, rejecting a connection.");
+	if (queue->count == CONNECTION_QUEUE_CAPACITY) {
+		log_err("Connection queue filled, rejecting a connection.");
 		if (pthread_mutex_unlock(&queue->lock) != 0) {
 			log_alert("Mutex unlock failure, system may begin failing.");
 			return 1;
@@ -50,7 +49,7 @@ int mailconnq_enqueue(MailConnectionQueue * queue,
 		return 1;
 	}
 	queue->data[queue->head] = conn;
-	queue->head = (queue->head + 1) % MAIL_CONNECTION_QUEUE_CAPACITY;
+	queue->head = (queue->head + 1) % CONNECTION_QUEUE_CAPACITY;
 	queue->count++;
 	if (pthread_mutex_unlock(&queue->lock) != 0) {
 		log_alert("Mutex unlock failure, system may begin failing.");
@@ -59,8 +58,8 @@ int mailconnq_enqueue(MailConnectionQueue * queue,
 	return 0;
 }
 
-int mailconnq_dequeue(MailConnectionQueue * queue,
-					  MailConnection * conn) {
+int conn_queue_dequeue(ConnectionQueue * queue,
+					  Connection * conn) {
 	if (pthread_mutex_lock(&queue->lock) != 0) {
 		log_alert("Mutex lock failure, system may begin failing.");
 		return 1;
@@ -73,7 +72,7 @@ int mailconnq_dequeue(MailConnectionQueue * queue,
 		return 1;
 	}
 	*conn = queue->data[queue->tail];
-	queue->tail = (queue->tail + 1) % MAIL_CONNECTION_QUEUE_CAPACITY;
+	queue->tail = (queue->tail + 1) % CONNECTION_QUEUE_CAPACITY;
 	queue->count--;
 	if (pthread_mutex_unlock(&queue->lock) != 0) {
 		log_alert("Mutex unlock failure, system may begin failing.");
@@ -94,19 +93,19 @@ int get_accept_state(int acceptresult) {
 	}	
 }
 
-int handle_connection(MailConnectionType type,
+int handle_connection(ConnectionType type,
 					  int clientsocket) {
 	switch (get_accept_state(clientsocket)) {
 	case ACCEPT_UNBLOCK: return 0;
 	case ACCEPT_ERROR: return 1;
 	case ACCEPT_CONTENT:
-		log_debug("Received a mail connection");
-		MailConnection mailconn = {
+		log_debug("Received a connection");
+		Connection mailconn = {
 			.type = type,
 			.clientsocket = clientsocket,
 			.state = MAIL_CONNECTION_OPENED
 		};
-		if (mailconnq_enqueue(&mailconnqueue,
+		if (conn_queue_enqueue(&connqueue,
 							  mailconn) != 0) {
 			log_err("Failed to enqueue a connection. rejecting...");
 			close(clientsocket);
@@ -118,14 +117,14 @@ int handle_connection(MailConnectionType type,
 	}
 }
 
-void process_mail_connection(void) {
-	MailConnection conn = {0};
-	if (mailconnq_dequeue(&mailconnqueue,
+void process_connection(void) {
+	Connection conn = {0};
+	if (conn_queue_dequeue(&connqueue,
 						  &conn) != 0) {
 		return;
 	}
 
-	log_debug("Processing a mail connection.");
+	log_debug("Processing a connection.");
 	switch (conn.type) {
 	case SMTP_CONNECTION:
 		dprintf(conn.clientsocket, "421 Unimplemented\n");
@@ -148,7 +147,7 @@ void process_mail_connection(void) {
 void * start_master_service(void *) {
 	log_info("Starting master service...");
 
-	if(mailconnq_init(&mailconnqueue) != 0) {
+	if(conn_queue_init(&connqueue) != 0) {
 		log_err("Couldn't initialize the mail connection queue.");
 		return NULL;
 	}
@@ -196,7 +195,7 @@ void * start_master_service(void *) {
 			log_err("StartTLS: Failed to handle connection on IPv6.");
 		}
 
-		process_mail_connection();
+		process_connection();
 	}
 
 	log_info("Master service stopped successfully.");

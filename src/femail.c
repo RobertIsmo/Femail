@@ -4,9 +4,6 @@
 #include <signal.h>
 #include <pthread.h>
 #include "femail.h"
-#include "comm.h"
-#include "master.h"
-#include "dns.h"
 
 #ifndef DEBUG
 #define DEBUG 0
