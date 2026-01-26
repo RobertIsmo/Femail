@@ -35,7 +35,7 @@ down:
 	$(CONTAINER_TOOL)-compose down -t 3
 
 logs:
-	$(CONTAINER_TOOL)-compose logs --names
+	$(CONTAINER_TOOL)-compose logs --names -f
 
 femail/debian/debfemail: bin/debfemail
 	install $< $@
