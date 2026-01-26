@@ -1,4 +1,3 @@
-#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <stddef.h>
@@ -6,8 +5,8 @@
 #include <string.h>
 #include <pthread.h>
 #include <errno.h>
-#include "master.h"
 #include "femail.h"
+#include "master.h"
 
 ConnectionQueue connqueue = {0};
 
@@ -125,21 +124,39 @@ void process_connection(void) {
 	}
 
 	log_debug("Processing a connection.");
+	ConnectionHandlerResult result = CONNECTION_ERROR;
 	switch (conn.type) {
 	case SMTP_CONNECTION:
-		dprintf(conn.clientsocket, "421 Unimplemented\n");
-		close(conn.clientsocket);
+		result = smtp_handler(&conn);
 		break;
 	case SMTPS_CONNECTION:
-		dprintf(conn.clientsocket, "421 Submission Unimplemented\n");
-		close(conn.clientsocket);
+		result = smtps_handler(&conn);
 		break;
 	case STARTTLS_CONNECTION:
-		dprintf(conn.clientsocket, "523 Use SMTPS instead\n");
-		close(conn.clientsocket);
+		result = starttls_handler(&conn);
 		break;
 	default:
 		log_emerg("Unexpected mail connection type. aborting...");
+		abort();
+	}
+
+	switch(result) {
+	case CONNECTION_CONTINUE:
+		if (conn_queue_enqueue(&connqueue,
+							   conn) != 0) {
+			log_err("Failed to renqueue a connection. dropping...");
+			close(conn.clientsocket);
+		}
+		break;
+	case CONNECTION_DONE:
+		close(conn.clientsocket);
+		break;
+	case CONNECTION_ERROR:
+		log_err("Received an error while handling a connection.");
+		close(conn.clientsocket);
+		break;
+	default:
+		log_emerg("Unexpected connection handler result. aborting...");
 		abort();
 	}
 }
