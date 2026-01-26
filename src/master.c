@@ -47,9 +47,12 @@ int handle_submission(int acceptresult) {
 	case ACCEPT_ERROR: return 1;
 	case ACCEPT_CONTENT:
 		int clientsocket = acceptresult;
-		log_err("unimplemented");
+
+		log_warn("SMTPS is unimplemented.");
+		dprintf(clientsocket, "421 Unimplemented\n");
+		
 		close(clientsocket);
-		return 1;
+		return 0;
 	default:
 		log_emerg("Unexpected accept status. aborting...");
 		abort();
