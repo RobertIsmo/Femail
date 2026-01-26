@@ -145,14 +145,17 @@ void process_connection(void) {
 		if (conn_queue_enqueue(&connqueue,
 							   conn) != 0) {
 			log_err("Failed to renqueue a connection. dropping...");
+			log_debug("Closing...");
 			close(conn.clientsocket);
 		}
 		break;
 	case CONNECTION_DONE:
+		log_debug("Connection finished. Closing...");
 		close(conn.clientsocket);
 		break;
 	case CONNECTION_ERROR:
 		log_err("Received an error while handling a connection.");
+		log_debug("Closing...");
 		close(conn.clientsocket);
 		break;
 	default:
