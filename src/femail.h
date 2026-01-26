@@ -18,7 +18,17 @@
 #define log_warn(fmt, ...)   log_base(LOG_WARNING,"WARN: "   fmt, ##__VA_ARGS__)
 #define log_notice(fmt, ...) log_base(LOG_NOTICE, "NOTICE: " fmt, ##__VA_ARGS__)
 #define log_info(fmt, ...)   log_base(LOG_INFO,   fmt,       ##__VA_ARGS__)
+#ifdef DEBUG
 #define log_debug(fmt, ...)  log_base(LOG_DEBUG,  "DEBUG: "  fmt, ##__VA_ARGS__)
+#else
+#define log_debug(fmt, ...)
+#endif
+
+typedef enum {
+	CONNECTION_DONE,
+	CONNECTION_CONTINUE,
+	CONNECTION_ERROR,
+} ConnectionHandlerResult;
 
 typedef enum {
 	SMTP_CONNECTION,
@@ -58,6 +68,10 @@ void check_communications(smtpcontext *,
 void stop_smtp(smtpcontext *);
 void stop_smtps(smtpscontext *);
 void stop_starttls(starttlscontext *);
+
+ConnectionHandlerResult smtp_handler(Connection *);
+ConnectionHandlerResult smtps_handler(Connection *);
+ConnectionHandlerResult starttls_handler(Connection *);
 
 void * start_master_service(void *);
 
