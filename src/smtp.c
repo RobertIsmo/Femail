@@ -3,7 +3,8 @@
 #include "femail.h"
 
 ConnectionHandlerResult smtp_handler(Connection * conn) {
-	dprintf(conn->clientsocket, "421 Unimplemented\n");
+	dprintf(conn->clientsocket,
+			"421 Unimplemented\n");
 	return CONNECTION_DONE;
 }
 
