@@ -56,7 +56,7 @@ int handle_submission(int acceptresult) {
 	}
 }
 
-int handle_reject(int acceptresult) {
+int handle_reject_starttls(int acceptresult) {
 	switch(get_accept_state(acceptresult)) {
 	case ACCEPT_UNBLOCK: return 0;
 	case ACCEPT_ERROR: return 1;
@@ -101,13 +101,13 @@ void * start_master_service(void *) {
 			log_err("SMTPS: Failed to handle connection on IPv6.");
 		}
 
-		if (handle_reject(accept(starttlsctx.socket4,
+		if (handle_reject_starttls(accept(starttlsctx.socket4,
 								 NULL,
 								 NULL)) != 0) {
 			log_err("StartTLS: Failed to handle connection on IPv4.");
 		}
 
-		if (handle_reject(accept(starttlsctx.socket6,
+		if (handle_reject_starttls(accept(starttlsctx.socket6,
 								 NULL, 
 								 NULL)) != 0) {
 			log_err("StartTLS: Failed to handle connection on IPv6.");
