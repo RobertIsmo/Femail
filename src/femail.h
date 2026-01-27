@@ -38,13 +38,22 @@ typedef enum {
 
 typedef enum {
 	MAIL_CONNECTION_OPENED,
-	MAIL_CONNECTION_EXPECT_HELLO
+	MAIL_CONNECTION_EXPECT_HELLO,
+	MAIL_CONNECTION_EXPECT_FROM,
+	MAIL_CONNECTION_EXPECT_RCPT,
+	MAIL_CONNECTION_EXPECT_DATA,
+	MAIL_CONNECTION_EXPECT_QUIT
 } ConnectionState;
 
 typedef struct {
 	ConnectionType	type;
 	ConnectionState state;
 	int				clientsocket;
+	char			mailclientdomain[DOMAIN_MAX_SIZE];
+	size_t			alloccount;
+	size_t			messagebuffersize;
+	size_t			messagebufferend;
+	char *			messagebuffer;
 } Connection;
 
 

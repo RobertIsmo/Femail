@@ -10,6 +10,11 @@
 
 ConnectionQueue connqueue = {0};
 
+void connection_deinit(Connection * conn) {
+	free(conn->messagebuffer);
+	close(conn->clientsocket);
+}
+
 int conn_queue_init(ConnectionQueue * queue) {
 	pthread_mutex_init(&queue->lock,
 					   NULL);
@@ -99,10 +104,14 @@ int handle_connection(ConnectionType type,
 	case ACCEPT_ERROR: return 1;
 	case ACCEPT_CONTENT:
 		log_debug("Received a connection");
-		Connection mailconn = {
-			.type = type,
-			.clientsocket = clientsocket,
-			.state = MAIL_CONNECTION_OPENED
+		Connection mailconn	   = {
+			.type			   = type,
+			.clientsocket	   = clientsocket,
+			.state			   = MAIL_CONNECTION_OPENED,
+			.alloccount		   = 0,
+			.messagebuffersize = 0,
+			.messagebufferend  = 0,
+			.messagebuffer	   = NULL,
 		};
 		if (conn_queue_enqueue(&connqueue,
 							  mailconn) != 0) {
@@ -146,17 +155,17 @@ void process_connection(void) {
 							   conn) != 0) {
 			log_err("Failed to renqueue a connection. dropping...");
 			log_debug("Closing...");
-			close(conn.clientsocket);
+			connection_deinit(&conn);
 		}
 		break;
 	case CONNECTION_DONE:
 		log_debug("Connection finished. Closing...");
-		close(conn.clientsocket);
+		connection_deinit(&conn);
 		break;
 	case CONNECTION_ERROR:
 		log_err("Received an error while handling a connection.");
 		log_debug("Closing...");
-		close(conn.clientsocket);
+		connection_deinit(&conn);
 		break;
 	default:
 		log_emerg("Unexpected connection handler result. aborting...");
