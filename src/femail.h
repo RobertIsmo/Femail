@@ -1,14 +1,14 @@
 #ifndef FEMAIL_H
 #define FEMAIL_H
 
-#include <syslog.h>
+#include	<syslog.h>
 #include <signal.h>
 #include "comm.h"
 
-#define NAMEVERSION_SIZE 1024
-#define DOMAIN_MAX_SIZE 255
+#define NAMEVERSION_SIZE	1024
+#define DOMAIN_MAX_SIZE		255
 
-#define log_base(level, fmt, ...) \
+#define log_base(level, fmt, ...)				\
     syslog(level, fmt, ##__VA_ARGS__)
 
 #define log_emerg(fmt, ...)  log_base(LOG_EMERG,  "EMERG: "  fmt, ##__VA_ARGS__)
@@ -37,25 +37,26 @@ typedef enum {
 } ConnectionType;
 
 typedef enum {
-	MAIL_CONNECTION_OPENED
+	MAIL_CONNECTION_OPENED,
+	MAIL_CONNECTION_EXPECT_HELLO
 } ConnectionState;
 
 typedef struct {
-	ConnectionType type;
+	ConnectionType	type;
 	ConnectionState state;
-	int clientsocket;
+	int				clientsocket;
 } Connection;
 
 
-void request_stop(int);
-int is_stopped(void);
+void	request_stop(int);
+int		is_stopped(void);
 
-int dns_init(void);
-char * get_mail_domain(void);
+int	    dns_init(void);
+char *  get_mail_domain(void);
 
-void init_smtp(smtpcontext *);
-void init_smtps(smtpscontext *);
-void init_starttls(starttlscontext *);
+void	init_smtp(smtpcontext *);
+void	init_smtps(smtpscontext *);
+void	init_starttls(starttlscontext *);
 
 int start_smtp(smtpcontext *);
 int start_smtps(smtpscontext *);
@@ -65,20 +66,20 @@ void check_communications(smtpcontext *,
 						  smtpscontext *,
 						  starttlscontext *);
 
-void stop_smtp(smtpcontext *);
-void stop_smtps(smtpscontext *);
-void stop_starttls(starttlscontext *);
+void	stop_smtp(smtpcontext *);
+void	stop_smtps(smtpscontext *);
+void	stop_starttls(starttlscontext *);
 
 ConnectionHandlerResult smtp_handler(Connection *);
 ConnectionHandlerResult smtps_handler(Connection *);
 ConnectionHandlerResult starttls_handler(Connection *);
 
-void * start_master_service(void *);
+void *	start_master_service(void *);
 
-extern char nameversion[NAMEVERSION_SIZE];
-extern volatile sig_atomic_t stop_signal;
+extern char						nameversion[NAMEVERSION_SIZE];
+extern volatile sig_atomic_t	stop_signal;
 
-extern smtpcontext smtpctx;
+extern smtpcontext	smtpctx;
 extern smtpscontext smtpsctx;
 extern starttlscontext starttlsctx;
 
