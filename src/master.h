@@ -7,9 +7,6 @@
 
 #define CONNECTION_QUEUE_CAPACITY 512
 
-#define smtpsmsg_reject_unimplemented() dprintf(clientsocket, "421 Unimplemented\n");
-#define smtpsmsg_reject_starttls() dprintf(clientsocket, "523 Use SMTPS instead\n");
-
 typedef enum {
 	ACCEPT_CONTENT,
 	ACCEPT_UNBLOCK,
