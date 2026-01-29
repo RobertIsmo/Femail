@@ -10,6 +10,28 @@
 
 ConnectionQueue connqueue = {0};
 
+void connection_init(Connection * conn) {
+	conn->live = true;
+	// these two will be set else where
+	// conn->type			= type;
+	// conn->clientsocket	= clientsocket;
+	conn->state				= MAIL_CONNECTION_OPENED;
+	conn->alloccount		= 0;
+	conn->messagebuffersize = 0;
+	conn->messagebufferend  = 0;
+	conn->messagebuffer		= NULL;
+}
+
+void reset_connection(Connection * conn) {
+	conn->live				= true;
+	conn->state				= MAIL_CONNECTION_EXPECT_ANY;
+	conn->alloccount		= 0;
+	conn->messagebuffersize = 0;
+	conn->messagebufferend  = 0;
+	free(conn->messagebuffer);
+	conn->messagebuffer		= NULL;
+}
+
 void connection_deinit(Connection * conn) {
 	free(conn->messagebuffer);
 	close(conn->clientsocket);
@@ -104,17 +126,12 @@ int handle_connection(ConnectionType type,
 	case ACCEPT_ERROR: return 1;
 	case ACCEPT_CONTENT:
 		log_debug("Received a connection");
-		Connection mailconn	   = {
-			.type			   = type,
-			.clientsocket	   = clientsocket,
-			.state			   = MAIL_CONNECTION_OPENED,
-			.alloccount		   = 0,
-			.messagebuffersize = 0,
-			.messagebufferend  = 0,
-			.messagebuffer	   = NULL,
-		};
+		Connection conn;
+		connection_init(&conn);
+		conn.type = type;
+		conn.clientsocket = clientsocket;
 		if (conn_queue_enqueue(&connqueue,
-							  mailconn) != 0) {
+							  conn) != 0) {
 			log_err("Failed to enqueue a connection. rejecting...");
 			close(clientsocket);
 		}
@@ -154,6 +171,15 @@ void process_connection(void) {
 		if (conn_queue_enqueue(&connqueue,
 							   conn) != 0) {
 			log_err("Failed to renqueue a connection. dropping...");
+			log_debug("Closing...");
+			connection_deinit(&conn);
+		}
+		break;
+	case CONNECTION_RESET:
+		reset_connection(&conn);
+		if (conn_queue_enqueue(&connqueue,
+							   conn) != 0) {
+			log_err("Failed to renqueue a reset connection. dropping...");
 			log_debug("Closing...");
 			connection_deinit(&conn);
 		}

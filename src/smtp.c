@@ -44,25 +44,31 @@ int move_client_mail_domain(char * buffer,
 }
 
 ConnectionHandlerResult smtp_handler(Connection * conn) {
+	if (conn->state == MAIL_CONNECTION_OPENED) {
+		log_debug("SMTP Handler: connection opened.");
+		smtpsmsg_accept_connection();
+		conn->state = MAIL_CONNECTION_EXPECT_HELLO;
+		return CONNECTION_CONTINUE;
+	}
+	
 	size_t readamount = 0;
 	char buffer [SMALL_BUFFER_SIZE] = {0};
-	if (conn->state != MAIL_CONNECTION_OPENED) {
-		log_debug("Reading...");
-		readamount = (size_t)read(conn->clientsocket,
-								 buffer,
-								 SMALL_BUFFER_SIZE);
-		if (readamount >= SMALL_BUFFER_SIZE - 1) {
-			smtpsmsg_reject_too_long();
-			return CONNECTION_ERROR;
-		}
-		log_debug("Received: %s", buffer);
+
+	log_debug("Reading...");
+	readamount = (size_t)read(conn->clientsocket,
+							  buffer,
+							  SMALL_BUFFER_SIZE);
+	if (readamount >= SMALL_BUFFER_SIZE - 1) {
+		smtpsmsg_reject_too_long();
+		return CONNECTION_ERROR;
 	}
+	log_debug("Received: %s", buffer);
 
 	if (strncasecmp(buffer,
 					"RSET",
 					RSET_COMMAND_SIZE) == 0) {
 		smtpsmsg_accept_generic();
-		return CONNECTION_CONTINUE;
+		return CONNECTION_RESET;
 	} else if (strncasecmp(buffer,
 					"QUIT",
 					QUIT_COMMAND_SIZE) == 0) {
@@ -76,11 +82,6 @@ ConnectionHandlerResult smtp_handler(Connection * conn) {
 	}
 	
 	switch (conn->state) {
-	case MAIL_CONNECTION_OPENED:
-		log_debug("SMTP Handler: connection opened.");
-		smtpsmsg_accept_connection();
-		conn->state = MAIL_CONNECTION_EXPECT_HELLO;
-		break;
 	case MAIL_CONNECTION_EXPECT_HELLO:
 		log_debug("SMTP Handler: expecting HELLO.");
 		if (strncasecmp(buffer,

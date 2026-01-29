@@ -1,8 +1,9 @@
 #ifndef FEMAIL_H
 #define FEMAIL_H
 
-#include	<syslog.h>
+#include <syslog.h>
 #include <signal.h>
+#include <stdbool.h>
 #include "comm.h"
 
 #define NAMEVERSION_SIZE	1024
@@ -27,6 +28,7 @@
 typedef enum {
 	CONNECTION_DONE,
 	CONNECTION_CONTINUE,
+	CONNECTION_RESET,
 	CONNECTION_ERROR,
 } ConnectionHandlerResult;
 
@@ -38,14 +40,15 @@ typedef enum {
 
 typedef enum {
 	MAIL_CONNECTION_OPENED,
+	MAIL_CONNECTION_EXPECT_ANY,
 	MAIL_CONNECTION_EXPECT_HELLO,
 	MAIL_CONNECTION_EXPECT_FROM,
 	MAIL_CONNECTION_EXPECT_RCPT,
-	MAIL_CONNECTION_EXPECT_DATA,
-	MAIL_CONNECTION_EXPECT_CONT
+	MAIL_CONNECTION_EXPECT_DATA
 } ConnectionState;
 
 typedef struct {
+	bool			live;
 	ConnectionType	type;
 	ConnectionState state;
 	int				clientsocket;

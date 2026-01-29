@@ -21,6 +21,8 @@ typedef struct {
 	Connection data[CONNECTION_QUEUE_CAPACITY];
 } ConnectionQueue;
 
+void connection_init(Connection *);
+void reset_connection(Connection *);
 void connection_deinit(Connection *);
 
 int conn_queue_init(ConnectionQueue *);
