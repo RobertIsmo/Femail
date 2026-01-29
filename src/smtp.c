@@ -59,6 +59,11 @@ ConnectionHandlerResult smtp_handler(Connection * conn) {
 	}
 
 	if (strncasecmp(buffer,
+					"QUIT",
+					QUIT_COMMAND_SIZE) == 0) {
+		smtpsmsg_accept_goodbye();
+		return CONNECTION_DONE;
+	} else if (strncasecmp(buffer,
 					"NOOP",
 					NOOP_COMMAND_SIZE) == 0) {
 		smtpsmsg_accept_generic();
@@ -155,24 +160,14 @@ ConnectionHandlerResult smtp_handler(Connection * conn) {
 
 		if (found_crlf_end(conn->messagebuffer)) {
 			log_debug("Found the CRLF!");
-			conn->state = MAIL_CONNECTION_EXPECT_QUIT;
+			conn->state = MAIL_CONNECTION_EXPECT_CONT;
 			smtpsmsg_accept_generic();
 			break;
 		}
 		break;
-	case MAIL_CONNECTION_EXPECT_QUIT:
-		log_debug("SMTP Handler: expecting quit.");
-		if (strncasecmp(buffer,
-						"QUIT",
-						QUIT_COMMAND_SIZE)  == 0) {
-			log_debug("SMTP Handler: got the quit. finished connection. Final message body:\n%s", conn->messagebuffer);
-			smtpsmsg_accept_goodbye();
-			return CONNECTION_DONE;
-		} else {
-			log_debug("SMTP Handler: got %s", buffer);
-			smtpsmsg_reject_commands();
-			return CONNECTION_DONE;
-		}
+	case MAIL_CONNECTION_EXPECT_CONT:
+		// TODO: Implement open continuation.
+		return CONNECTION_CONTINUE;
 	default:
 		log_err("Unknown connection state %d.", conn->state);
 		smtpsmsg_reject_error();
