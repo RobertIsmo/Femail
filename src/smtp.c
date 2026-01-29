@@ -59,6 +59,11 @@ ConnectionHandlerResult smtp_handler(Connection * conn) {
 	}
 
 	if (strncasecmp(buffer,
+					"RSET",
+					RSET_COMMAND_SIZE) == 0) {
+		smtpsmsg_accept_generic();
+		return CONNECTION_CONTINUE;
+	} else if (strncasecmp(buffer,
 					"QUIT",
 					QUIT_COMMAND_SIZE) == 0) {
 		smtpsmsg_accept_goodbye();
