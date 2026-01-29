@@ -134,8 +134,14 @@ ConnectionHandlerResult smtp_handler(Connection * conn) {
 		log_debug("SMTP Handler: expecting data.");
 
 		conn->alloccount++;
+		size_t messagebuffersize = conn->alloccount * SMALL_BUFFER_SIZE + 4;
+		if (messagebuffersize > ESMTP_SIZE) {
+			log_debug("SMTP Handler: rejecting a large message.");
+			smtpsmsg_reject_too_large();
+			return CONNECTION_ERROR;
+		}
 		conn->messagebuffer = realloc(conn->messagebuffer,
-									  conn->alloccount * SMALL_BUFFER_SIZE + 4);
+									  messagebuffersize);
 		if (conn->messagebuffer == NULL) {
 			smtpsmsg_reject_error();
 			return CONNECTION_ERROR;
