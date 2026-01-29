@@ -11,7 +11,7 @@
 ConnectionQueue connqueue = {0};
 
 void connection_init(Connection * conn) {
-	conn->live = true;
+	conn->live		  = true;
 	// these two will be set else where
 	// conn->type			= type;
 	// conn->clientsocket	= clientsocket;
@@ -23,8 +23,12 @@ void connection_init(Connection * conn) {
 }
 
 void reset_connection(Connection * conn) {
-	conn->live				= true;
-	conn->state				= MAIL_CONNECTION_EXPECT_ANY;
+	conn->live		= true;
+	if (conn->state == MAIL_CONNECTION_GREETED) {		
+		conn->state = MAIL_CONNECTION_GREETED;
+	} else {
+		conn->state	= MAIL_CONNECTION_EXPECT_ANY;
+	}
 	conn->alloccount		= 0;
 	conn->messagebuffersize = 0;
 	conn->messagebufferend  = 0;
