@@ -57,6 +57,14 @@ ConnectionHandlerResult smtp_handler(Connection * conn) {
 		}
 		log_debug("Received: %s", buffer);
 	}
+
+	if (strncasecmp(buffer,
+					"NOOP",
+					NOOP_COMMAND_SIZE) == 0) {
+		smtpsmsg_accept_generic();
+		return CONNECTION_CONTINUE;
+	}
+	
 	switch (conn->state) {
 	case MAIL_CONNECTION_OPENED:
 		log_debug("SMTP Handler: connection opened.");

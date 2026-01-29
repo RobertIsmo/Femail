@@ -5,10 +5,11 @@
 #include "femail.h"
 
 #define HELLO_COMMAND_SIZE	5
-#define DATA_COMMAND_SIZE 4
-#define RCPT_COMMAND_SIZE 8
-#define QUIT_COMMAND_SIZE 4
-#define ESMTP_SIZE 10485760
+#define NOOP_COMMAND_SIZE	4
+#define DATA_COMMAND_SIZE	4
+#define RCPT_COMMAND_SIZE	8
+#define QUIT_COMMAND_SIZE	4
+#define ESMTP_SIZE			10485760
 #define SMALL_BUFFER_SIZE	1024
 
 #define smtpsmsg_accept_generic()		dprintf(conn->clientsocket, "250 Ok\r\n")
