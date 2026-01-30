@@ -117,24 +117,44 @@ int move_client_mail_domain(char * param,
 }
 
 ConnectionHandlerResult smtp_handler(Connection * conn) {
+	if (!conn->live) {
+		log_debug("Processing a dead connection. skipping...");
+		return CONNECTION_DONE;
+	}
+	
+	log_debug("Processing a connection\nType: %d\nState: %d\nStarted: %ld\nRefresh: %ld",
+			  conn->type,
+			  conn->state,
+			  conn->timeinitialized,
+			  conn->timerefreshed);
+	
 	if (conn->state == MAIL_CONNECTION_OPENED) {
-		log_debug("SMTP Handler: connection opened.");
 		smtpsmsg_accept_connection();
 		conn->state = MAIL_CONNECTION_EXPECT_ANY;
 		return CONNECTION_CONTINUE;
 	}
 	
-	size_t readamount = 0;
 	char buffer [SMALL_BUFFER_SIZE] = {0};
+	ssize_t readresult = read(conn->clientsocket,
+						  buffer,
+						  SMALL_BUFFER_SIZE);
 
-	log_debug("Reading...");
-	readamount = (size_t)read(conn->clientsocket,
-							  buffer,
-							  SMALL_BUFFER_SIZE);
-	if (readamount >= SMALL_BUFFER_SIZE - 1) {
+	log_debug("result: %ld",
+			  readresult);
+	if (readresult >= SMALL_BUFFER_SIZE - 1) {
 		smtpsmsg_reject_too_long();
 		return CONNECTION_ERROR;
+	} else if (readresult == -1) {
+		if (errno == EWOULDBLOCK) {
+			return CONNECTION_CONTINUE;
+		} else {
+			return CONNECTION_ERROR;
+		}
+	} else if (readresult == 0) {
+		return CONNECTION_ERROR;
 	}
+
+	size_t readamount = (size_t)readresult;
 
 	if (conn->state == MAIL_CONNECTION_EXPECT_DATA) {
 		log_debug("SMTP Handler: handling message...");
