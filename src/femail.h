@@ -1,9 +1,10 @@
 #ifndef FEMAIL_H
 #define FEMAIL_H
 
-#include <syslog.h>
-#include <signal.h>
 #include <stdbool.h>
+#include <syslog.h>
+#include <time.h>
+#include <signal.h>
 #include "comm.h"
 
 #define NAMEVERSION_SIZE	1024
@@ -48,6 +49,8 @@ typedef enum {
 } ConnectionState;
 
 typedef struct {
+	time_t			timeinitialized;
+	time_t			timerefreshed;
 	bool			live;
 	ConnectionType	type;
 	ConnectionState state;

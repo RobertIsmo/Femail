@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stddef.h>
 #include <unistd.h>
+#include <time.h>
 #include <string.h>
 #include <pthread.h>
 #include <errno.h>
@@ -11,6 +12,8 @@
 ConnectionQueue connqueue = {0};
 
 void connection_init(Connection * conn) {
+	time(&conn->timeinitialized);
+	time(&conn->timerefreshed);
 	conn->live		  = true;
 	// these two will be set else where
 	// conn->type			= type;
@@ -37,6 +40,7 @@ void reset_connection(Connection * conn) {
 }
 
 void connection_deinit(Connection * conn) {
+	conn->live = false;
 	free(conn->messagebuffer);
 	close(conn->clientsocket);
 }
@@ -78,6 +82,7 @@ int conn_queue_enqueue(ConnectionQueue * queue,
 		}
 		return 1;
 	}
+	time(&conn.timerefreshed);
 	queue->data[queue->head] = conn;
 	queue->head = (queue->head + 1) % CONNECTION_QUEUE_CAPACITY;
 	queue->count++;
@@ -152,8 +157,7 @@ void process_connection(void) {
 						  &conn) != 0) {
 		return;
 	}
-
-	log_debug("Processing a connection.");
+	
 	ConnectionHandlerResult result = CONNECTION_ERROR;
 	switch (conn.type) {
 	case SMTP_CONNECTION:
