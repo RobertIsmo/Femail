@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <errno.h>
 #include "femail.h"
 #include "smtp.h"
 
@@ -218,6 +219,7 @@ ConnectionHandlerResult smtp_handler(Connection * conn) {
 		return CONNECTION_CONTINUE;
 	case SMTP_HELP:
 		log_debug("SMTP Handler: handling HELP...");
+		// TODO: Should look something like this `214 2.0.0 Commands: AUTH BDAT DATA EHLO ETRN HELO HELP MAIL NOOP QUIT RCPT RSET STARTTLS VRFY XCLIENT XFORWARD`
 		smtpsmsg_accept_ok();
 		return CONNECTION_CONTINUE;
 	case SMTP_HELO:
