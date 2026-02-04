@@ -122,12 +122,28 @@ ConnectionHandlerResult smtp_handler(Connection * conn) {
 		log_debug("Processing a dead connection. skipping...");
 		return CONNECTION_DONE;
 	}
-	
-	log_debug("Processing a connection\nType: %d\nState: %d\nStarted: %ld\nRefresh: %ld",
+
+#ifdef DEBUG
+	size_t messagelength = 0;
+	if (conn->messagebuffer) {
+		messagelength = strlen(conn->messagebuffer);
+	}
+	log_debug("Processing a connection\n" \
+			  "Type: %d\n" \
+			  "State: %d\n" \
+			  "Started: %ld\n" \
+			  "Refresh: %ld\n" \
+			  "Alloc Count: %ld\n" \
+			  "Buffer Data Size: %ld\n" \
+			  "Buffer String Length: %ld",
 			  conn->type,
 			  conn->state,
 			  conn->timeinitialized,
-			  conn->timerefreshed);
+			  conn->timerefreshed,
+			  conn->alloccount,
+			  conn->messagebufferend,
+			  messagelength);
+#endif
 	
 	if (conn->state == MAIL_CONNECTION_OPENED) {
 		smtpsmsg_accept_connection();
@@ -140,9 +156,10 @@ ConnectionHandlerResult smtp_handler(Connection * conn) {
 						  buffer,
 						  SMALL_BUFFER_SIZE);
 
-	log_debug("result: %ld",
+	log_debug("read amount: %ld",
 			  readresult);
-	if (readresult >= SMALL_BUFFER_SIZE - 1) {
+	if (readresult >= SMALL_BUFFER_SIZE - 1 &&
+		conn->state != MAIL_CONNECTION_EXPECT_DATA) {
 		smtpsmsg_reject_too_long();
 		return CONNECTION_ERROR;
 	} else if (readresult == -1) {
@@ -156,12 +173,12 @@ ConnectionHandlerResult smtp_handler(Connection * conn) {
 	}
 
 	size_t readamount = (size_t)readresult;
-
+	
 	if (conn->state == MAIL_CONNECTION_EXPECT_DATA) {
-		log_debug("SMTP Handler: handling message...");
+		log_debug("SMTP Handler: handling message data...");
 
 		conn->alloccount++;
-		size_t messagebuffersize = conn->alloccount * SMALL_BUFFER_SIZE + 4;
+		size_t messagebuffersize = (conn->alloccount * SMALL_BUFFER_SIZE) + 1;
 		if (messagebuffersize > ESMTP_SIZE) {
 			log_debug("SMTP Handler: rejecting a large message.");
 			smtpsmsg_reject_too_large();
@@ -170,6 +187,7 @@ ConnectionHandlerResult smtp_handler(Connection * conn) {
 		conn->messagebuffer = realloc(conn->messagebuffer,
 									  messagebuffersize);
 		if (conn->messagebuffer == NULL) {
+			log_err("Allocation Error");
 			smtpsmsg_reject_error();
 			return CONNECTION_ERROR;
 		}
@@ -178,7 +196,7 @@ ConnectionHandlerResult smtp_handler(Connection * conn) {
 			   buffer,
 			   readamount);
 		conn->messagebufferend += readamount;
-		conn->messagebuffer[readamount] = 0;
+		conn->messagebuffer[conn->messagebufferend] = 0;
 
 		if (found_crlf_end(conn->messagebuffer)) {
 			log_debug("Found the CRLF!");
@@ -188,6 +206,7 @@ ConnectionHandlerResult smtp_handler(Connection * conn) {
 					  conn->messagebuffer);
 			return CONNECTION_RESET;
 		}
+		log_debug("Continuing.");
 		return CONNECTION_CONTINUE;
 	}
 	
