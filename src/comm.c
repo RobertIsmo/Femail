@@ -376,7 +376,7 @@ int start_http(httpcontext * ctx) {
 		if (bind(ctx->socket4,
 				 (struct sockaddr *)&addr4,
 				 sizeof(addr4)) != 0) {
-			log_crit("HTTP: Unable to bind on the IPv4 socket. %s",
+			log_err("HTTP: Unable to bind on the IPv4 socket. %s",
 					 strerror(errno));
 			close(ctx->socket4);
 			ctx->socket4 = -1;
@@ -425,7 +425,7 @@ int start_http(httpcontext * ctx) {
 		if (bind(ctx->socket6,
 				 (struct sockaddr *)&addr6,
 				 sizeof(addr6)) != 0) {
-			log_crit("HTTP: Unable to bind on the IPv6 socket. %s",
+			log_err("HTTP: Unable to bind on the IPv6 socket. %s",
 					 strerror(errno));
 			close(ctx->socket6);
 			ctx->socket6 = -1;
