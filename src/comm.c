@@ -26,6 +26,18 @@ void init_starttls(starttlscontext * ctx) {
 	ctx->socket6 = -1;
 }
 
+void init_http(httpcontext * ctx) {
+	ctx->active = false;
+	ctx->socket4 = -1;
+	ctx->socket6 = -1;
+}
+
+void init_https(httpscontext * ctx) {
+	ctx->active = false;
+	ctx->socket4 = -1;
+	ctx->socket6 = -1;
+}
+
 
 int start_smtp(smtpcontext * ctx) {
 	if (ctx->active) {
@@ -336,6 +348,109 @@ int start_starttls(starttlscontext * ctx) {
 	}
 }
 
+int start_http(httpcontext * ctx) {
+	if (ctx->active) {
+		return 0;
+	}
+	
+	ctx->socket4 = socket(AF_INET,
+						  SOCK_STREAM | SOCK_NONBLOCK,
+						  0);
+	if (ctx->socket4 == -1) {
+		log_err("HTTP: Failed to create IPv4 socket.");
+	} else {
+		int opt = 1;
+		if (setsockopt(ctx->socket4,
+					   SOL_SOCKET,
+					   SO_REUSEADDR,
+					   &opt,
+					   sizeof(opt)) != 0) {
+			log_warn("HTTP: Couldn't set an IPv4 socket option.");
+		}
+
+		struct sockaddr_in addr4 = {0};
+		addr4.sin_family = AF_INET;
+		addr4.sin_addr.s_addr = INADDR_ANY;
+		addr4.sin_port = htons(HTTP_PORT);
+
+		if (bind(ctx->socket4,
+				 (struct sockaddr *)&addr4,
+				 sizeof(addr4)) != 0) {
+			log_crit("HTTP: Unable to bind on the IPv4 socket. %s",
+					 strerror(errno));
+			close(ctx->socket4);
+			ctx->socket4 = -1;
+		} else {
+			if (listen(ctx->socket4,
+					   SOMAXCONN) != 0) {
+				log_err("HTTP: Unable to listen on the IPv4 socket. %s",
+						strerror(errno));
+				close(ctx->socket4);
+				ctx->socket4 = -1;
+			} else {
+				ctx->active = true;
+			}
+		}
+	}
+
+	ctx->socket6 = socket(AF_INET6,
+						  SOCK_STREAM | SOCK_NONBLOCK,
+						  0);
+	if (ctx->socket6 == -1) {
+		log_err("HTTP: Failed to create IPv6 socket.");
+	} else {
+		int opt = 1;
+		if (setsockopt(ctx->socket6,
+					   SOL_SOCKET,
+					   SO_REUSEADDR,
+					   &opt,
+					   sizeof(opt)) != 0) {
+			log_warn("HTTP: Couldn't set an IPv6 socket option.");
+		}
+
+		int v6opt = 1;
+		if (setsockopt(ctx->socket6,
+					   IPPROTO_IPV6,
+					   IPV6_V6ONLY,
+					   &v6opt,
+					   sizeof(v6opt)) != 0) {
+			log_warn("HTTP: Couldn't set an IPv6 socket option.");
+		}
+
+		struct sockaddr_in6 addr6 = {0};
+		addr6.sin6_family = AF_INET6;
+		addr6.sin6_addr = in6addr_any;
+		addr6.sin6_port = htons(HTTP_PORT);
+
+		if (bind(ctx->socket6,
+				 (struct sockaddr *)&addr6,
+				 sizeof(addr6)) != 0) {
+			log_crit("HTTP: Unable to bind on the IPv6 socket. %s",
+					 strerror(errno));
+			close(ctx->socket6);
+			ctx->socket6 = -1;
+		} else {
+			if (listen(ctx->socket6,
+					   SOMAXCONN) != 0) {
+				log_err("HTTP: Unable to listen on the IPv6 socket. %s",
+						strerror(errno));
+				close(ctx->socket6);
+				ctx->socket6 = -1;
+			} else {
+				ctx->active = true;
+			}
+		}
+	}
+
+	if (ctx->active) {
+		log_info("Available on HTTP port %d.",
+				 HTTP_PORT);
+		return 0;
+	} else {
+		return 1;
+	}
+}
+
 
 void check_communications(smtpcontext * smtp,
 						 smtpscontext * smtps,
@@ -371,6 +486,18 @@ void stop_smtps(smtpscontext * ctx) {
 }
 
 void stop_starttls(starttlscontext * ctx) {
+	if (ctx->socket4 != -1) {
+		close(ctx->socket4);
+		ctx->socket4 = -1;
+	}
+	if (ctx->socket6 != -1) {
+		close(ctx->socket6);
+		ctx->socket6 = -1;
+	}
+	ctx->active = false;
+}
+
+void stop_http(httpcontext * ctx) {
 	if (ctx->socket4 != -1) {
 		close(ctx->socket4);
 		ctx->socket4 = -1;

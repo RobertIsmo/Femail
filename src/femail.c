@@ -35,9 +35,12 @@
 
 char nameversion[NAMEVERSION_SIZE];
 volatile sig_atomic_t stop_signal;
-smtpcontext smtpctx;
-smtpscontext smtpsctx;
+
+smtpcontext		smtpctx;
+smtpscontext	smtpsctx;
 starttlscontext starttlsctx;
+httpcontext		httpctx;
+httpscontext	httpsctx;
 
 void request_stop(int) {
 	log_notice("Stop requested on master service.");
@@ -84,6 +87,9 @@ int main() {
 	if(start_starttls(&starttlsctx) != 0) {
 		log_crit("failed to start STARTTLS service.");
 	}
+	if(start_http(&httpctx) != 0) {
+		log_err("failed to start HTTP service.");
+	}
 
 	check_communications(&smtpctx,
 						 &smtpsctx,
@@ -113,6 +119,7 @@ int main() {
 	stop_smtp(&smtpctx);
 	stop_smtps(&smtpsctx);
 	stop_starttls(&starttlsctx);
+	stop_http(&httpctx);
 
 	log_info("Successfully stopped Femail.");
 	closelog();

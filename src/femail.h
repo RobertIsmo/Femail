@@ -36,7 +36,9 @@ typedef enum {
 typedef enum {
 	SMTP_CONNECTION,
 	SMTPS_CONNECTION,
-	STARTTLS_CONNECTION
+	STARTTLS_CONNECTION,
+	HTTP_CONNECTION,
+	HTTPS_CONNECTION,
 } ConnectionType;
 
 typedef enum {
@@ -46,6 +48,7 @@ typedef enum {
 	MAIL_CONNECTION_MAILING,
 	MAIL_CONNECTION_RCPT,
 	MAIL_CONNECTION_EXPECT_DATA,
+	HTTP_CONNECTION_OPENED
 } ConnectionState;
 
 typedef struct {
@@ -72,10 +75,14 @@ char *  get_mail_domain(void);
 void	init_smtp(smtpcontext *);
 void	init_smtps(smtpscontext *);
 void	init_starttls(starttlscontext *);
+void	init_http(httpcontext *);
+void	init_https(httpscontext *);
 
-int start_smtp(smtpcontext *);
-int start_smtps(smtpscontext *);
-int start_starttls(starttlscontext *);
+int	start_smtp(smtpcontext *);
+int	start_smtps(smtpscontext *);
+int	start_starttls(starttlscontext *);
+int	start_http(httpcontext *);
+int	start_https(httpscontext *);
 
 void check_communications(smtpcontext *,
 						  smtpscontext *,
@@ -84,10 +91,14 @@ void check_communications(smtpcontext *,
 void	stop_smtp(smtpcontext *);
 void	stop_smtps(smtpscontext *);
 void	stop_starttls(starttlscontext *);
+void	stop_http(httpcontext *);
+void	stop_https(httpscontext *);
 
 ConnectionHandlerResult smtp_handler(Connection *);
 ConnectionHandlerResult smtps_handler(Connection *);
 ConnectionHandlerResult starttls_handler(Connection *);
+ConnectionHandlerResult http_handler(Connection *);
+ConnectionHandlerResult https_handler(Connection *);
 
 void *	start_master_service(void *);
 
@@ -97,5 +108,7 @@ extern volatile sig_atomic_t	stop_signal;
 extern smtpcontext	smtpctx;
 extern smtpscontext smtpsctx;
 extern starttlscontext starttlsctx;
+extern httpcontext httpctx;
+extern httpscontext httpsctx;
 
 #endif //FEMAIL_H

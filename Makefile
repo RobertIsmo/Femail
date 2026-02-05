@@ -22,7 +22,9 @@ VERSION_UPDATE=0
 VERSION_RELEASE=0
 VERSION_TAG="\"-rc\""
 
-Sources := src/femail.c src/comm.c src/master.c src/dns.c src/smtp.c
+Sources := \
+	src/femail.c src/comm.c src/master.c src/dns.c src/smtp.c \
+	src/http.c
 
 all: femail/debian/debfemail \
 	femail/scratch/debfemail-st \

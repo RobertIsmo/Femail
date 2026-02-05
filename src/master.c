@@ -18,7 +18,17 @@ void connection_init(Connection * conn) {
 	// these two will be set else where
 	// conn->type			= type;
 	// conn->clientsocket	= clientsocket;
-	conn->state				= MAIL_CONNECTION_OPENED;
+	switch(conn->type) {
+	case SMTP_CONNECTION:
+	case SMTPS_CONNECTION:
+	case STARTTLS_CONNECTION:
+		conn->state	= MAIL_CONNECTION_OPENED;
+		break;
+	case HTTP_CONNECTION:
+	case HTTPS_CONNECTION:
+		conn->state	= HTTP_CONNECTION_OPENED;
+		break;
+	}
 	conn->alloccount		= 0;
 	conn->messagebuffersize = 0;
 	conn->messagebufferend  = 0;
@@ -136,9 +146,9 @@ int handle_connection(ConnectionType type,
 	case ACCEPT_CONTENT:
 		log_debug("Received a connection");
 		Connection conn;
-		connection_init(&conn);
 		conn.type = type;
 		conn.clientsocket = clientsocket;
+		connection_init(&conn);
 		if (conn_queue_enqueue(&connqueue,
 							  conn) != 0) {
 			log_err("Failed to enqueue a connection. rejecting...");
@@ -168,6 +178,12 @@ void process_connection(void) {
 		break;
 	case STARTTLS_CONNECTION:
 		result = starttls_handler(&conn);
+		break;
+	case HTTP_CONNECTION:
+		result = http_handler(&conn);
+		break;
+	case HTTPS_CONNECTION:
+		result = https_handler(&conn);
 		break;
 	default:
 		log_emerg("Unexpected mail connection type. aborting...");
@@ -256,6 +272,19 @@ void * start_master_service(void *) {
 									 NULL, 
 									 NULL)) != 0) {
 			log_err("StartTLS: Failed to handle connection on IPv6.");
+		}
+		if (handle_connection(HTTP_CONNECTION,
+							  accept(httpctx.socket4,
+									 NULL,
+									 NULL)) != 0) {
+			log_err("HTTP: Failed to handle connection on IPv4.");
+		}
+
+		if (handle_connection(HTTP_CONNECTION,
+							  accept(httpctx.socket6,
+									 NULL,
+									 NULL)) != 0) {
+			log_err("HTTP: Failed to handle connection on IPv6.");
 		}
 
 		process_connection();
