@@ -232,59 +232,68 @@ void * start_master_service(void *) {
 	}
 	
 	while(!is_stopped()) {
-		if (handle_connection(SMTP_CONNECTION,
-							  accept(smtpctx.socket4,
-									 NULL,
-									 NULL)) != 0) {
-			log_err("SMTP: Failed to handle connection on IPv4.");
+		if (smtpctx.active) {
+			if (handle_connection(SMTP_CONNECTION,
+								  accept(smtpctx.socket4,
+										 NULL,
+										 NULL)) != 0) {
+				log_err("SMTP: Failed to handle connection on IPv4.");
+			}
+
+			if (handle_connection(SMTP_CONNECTION,
+								  accept(smtpctx.socket6,
+										 NULL,
+										 NULL)) != 0) {
+				log_err("SMTP: Failed to handle connection on IPv6.");
+			}
 		}
 
-		if (handle_connection(SMTP_CONNECTION,
-							  accept(smtpctx.socket6,
-									 NULL,
-									 NULL)) != 0) {
-			log_err("SMTP: Failed to handle connection on IPv6.");
+		if (smtpsctx.active) {
+			if (handle_connection(SMTPS_CONNECTION,
+								  accept(smtpsctx.socket4,
+										 NULL,
+										 NULL)) != 0) {
+				log_err("SMTPS: Failed to handle connection on IPv4.");
+			}
+
+			if (handle_connection(SMTPS_CONNECTION,
+								  accept(smtpsctx.socket6,
+										 NULL,
+										 NULL)) != 0) {
+				log_err("SMTPS: Failed to handle connection on IPv6.");
+			}
 		}
 
-		if (handle_connection(SMTPS_CONNECTION,
-							  accept(smtpsctx.socket4,
-									 NULL,
-									 NULL)) != 0) {
-			log_err("SMTPS: Failed to handle connection on IPv4.");
+		if (starttlsctx.active) {
+			if (handle_connection(STARTTLS_CONNECTION,
+								  accept(starttlsctx.socket4,
+										 NULL,
+										 NULL)) != 0) {
+				log_err("StartTLS: Failed to handle connection on IPv4.");
+			}
+
+			if (handle_connection(STARTTLS_CONNECTION,
+								  accept(starttlsctx.socket6,
+										 NULL, 
+										 NULL)) != 0) {
+				log_err("StartTLS: Failed to handle connection on IPv6.");
+			}
 		}
 
-		if (handle_connection(SMTPS_CONNECTION,
-							  accept(smtpsctx.socket6,
-									 NULL,
-									 NULL)) != 0) {
-			log_err("SMTPS: Failed to handle connection on IPv6.");
-		}
+		if (httpctx.active) {
+			if (handle_connection(HTTP_CONNECTION,
+								  accept(httpctx.socket4,
+										 NULL,
+										 NULL)) != 0) {
+				log_err("HTTP: Failed to handle connection on IPv4.");
+			}
 
-		if (handle_connection(STARTTLS_CONNECTION,
-							  accept(starttlsctx.socket4,
-									 NULL,
-									 NULL)) != 0) {
-			log_err("StartTLS: Failed to handle connection on IPv4.");
-		}
-
-		if (handle_connection(STARTTLS_CONNECTION,
-							  accept(starttlsctx.socket6,
-									 NULL, 
-									 NULL)) != 0) {
-			log_err("StartTLS: Failed to handle connection on IPv6.");
-		}
-		if (handle_connection(HTTP_CONNECTION,
-							  accept(httpctx.socket4,
-									 NULL,
-									 NULL)) != 0) {
-			log_err("HTTP: Failed to handle connection on IPv4.");
-		}
-
-		if (handle_connection(HTTP_CONNECTION,
-							  accept(httpctx.socket6,
-									 NULL,
-									 NULL)) != 0) {
-			log_err("HTTP: Failed to handle connection on IPv6.");
+			if (handle_connection(HTTP_CONNECTION,
+								  accept(httpctx.socket6,
+										 NULL,
+										 NULL)) != 0) {
+				log_err("HTTP: Failed to handle connection on IPv6.");
+			}
 		}
 
 		process_connection();
