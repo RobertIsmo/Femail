@@ -32,6 +32,7 @@ typedef struct {
 #define smtpsmsg_accept_ehello()		dprintf(conn->clientsocket, \
 												"250-%s Hello %s\n"	\
 												"250-SIZE %d\n"	\
+												"250-STARTTLS\n" \
 												"250 HELP\r\n",	\
 												get_mail_domain(),	\
 												conn->mailclientdomain,	\

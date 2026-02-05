@@ -209,6 +209,8 @@ ConnectionHandlerResult smtp_handler(Connection * conn) {
 		log_debug("Continuing.");
 		return CONNECTION_CONTINUE;
 	}
+
+	log_debug("Received: %s", buffer);
 	
 	SMTPClientCommand command;
 	if (parse_client_command(&command,
@@ -216,8 +218,6 @@ ConnectionHandlerResult smtp_handler(Connection * conn) {
 		smtpsmsg_reject_unrecognized();
 		return CONNECTION_CONTINUE;
 	}
-	
-	log_debug("Received: %s", buffer);
 
 	switch (command.command) {
 	case SMTP_NOOP:
