@@ -23,6 +23,27 @@ ConnectionHandlerResult http_handler(Connection * conn) {
 			  conn->timeinitialized,
 			  conn->timerefreshed);
 
+	char buffer [SMALL_BUFFER_SIZE] = {0};
+	ssize_t readresult = read(conn->clientsocket,
+						  buffer,
+						  SMALL_BUFFER_SIZE);
+
+	log_debug("read amount: %ld",
+			  readresult);
+	if (readresult >= SMALL_BUFFER_SIZE - 1) {
+		return CONNECTION_CONTINUE;
+	} else if (readresult == -1) {
+		if (errno == EWOULDBLOCK) {
+			return CONNECTION_CONTINUE;
+		} else {
+			return CONNECTION_ERROR;
+		}
+	} else if (readresult == 0) {
+		return CONNECTION_ERROR;
+	}
+
+	log_debug("Received: %s", buffer);
+
 	httpmsg_no_content();
 	return CONNECTION_DONE;
 }

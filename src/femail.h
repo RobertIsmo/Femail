@@ -9,6 +9,7 @@
 
 #define NAMEVERSION_SIZE	1024
 #define DOMAIN_MAX_SIZE		255
+#define SMALL_BUFFER_SIZE	1024
 
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)

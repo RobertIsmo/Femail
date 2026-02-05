@@ -5,7 +5,6 @@
 #include "femail.h"
 
 #define ESMTP_SIZE			10485760
-#define SMALL_BUFFER_SIZE	1024
 
 typedef enum {
 	SMTP_NOOP,
