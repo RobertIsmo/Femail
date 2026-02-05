@@ -10,18 +10,22 @@
 #define NAMEVERSION_SIZE	1024
 #define DOMAIN_MAX_SIZE		255
 
+#define STRINGIFY(x) #x
+#define TOSTRING(x) STRINGIFY(x)
+#define LOG_LOCATION __FILE__ ":" TOSTRING(__LINE__)
+
 #define log_base(level, fmt, ...)				\
     syslog(level, fmt, ##__VA_ARGS__)
 
-#define log_emerg(fmt, ...)  log_base(LOG_EMERG,  "EMERG: "  fmt, ##__VA_ARGS__)
-#define log_alert(fmt, ...)  log_base(LOG_ALERT,  "ALERT: "  fmt, ##__VA_ARGS__)
-#define log_crit(fmt, ...)   log_base(LOG_CRIT,   "CRIT: "   fmt, ##__VA_ARGS__)
-#define log_err(fmt, ...)    log_base(LOG_ERR,    "ERROR: "  fmt, ##__VA_ARGS__)
-#define log_warn(fmt, ...)   log_base(LOG_WARNING,"WARN: "   fmt, ##__VA_ARGS__)
-#define log_notice(fmt, ...) log_base(LOG_NOTICE, "NOTICE: " fmt, ##__VA_ARGS__)
-#define log_info(fmt, ...)   log_base(LOG_INFO,   fmt,       ##__VA_ARGS__)
+#define log_emerg(fmt, ...)  log_base(LOG_EMERG,  "EMERG %s: " fmt, LOG_LOCATION, ##__VA_ARGS__)
+#define log_alert(fmt, ...)  log_base(LOG_ALERT,  "ALERT %s: " fmt, LOG_LOCATION, ##__VA_ARGS__)
+#define log_crit(fmt, ...)   log_base(LOG_CRIT,   "CRIT %s: " fmt, LOG_LOCATION, ##__VA_ARGS__)
+#define log_err(fmt, ...)    log_base(LOG_ERR,    "ERROR %s: " fmt, LOG_LOCATION, ##__VA_ARGS__)
+#define log_warn(fmt, ...)   log_base(LOG_WARNING,"WARN %s: " fmt, LOG_LOCATION, ##__VA_ARGS__)
+#define log_notice(fmt, ...) log_base(LOG_NOTICE, "NOTICE %s: " fmt, LOG_LOCATION, ##__VA_ARGS__)
+#define log_info(fmt, ...)   log_base(LOG_INFO,   "INFO %s: " fmt, LOG_LOCATION, ##__VA_ARGS__)
 #ifdef DEBUG
-#define log_debug(fmt, ...)  log_base(LOG_DEBUG,  "DEBUG: "  fmt, ##__VA_ARGS__)
+#define log_debug(fmt, ...)  log_base(LOG_DEBUG,  "DEBUG %s: " fmt, LOG_LOCATION, ##__VA_ARGS__)
 #else
 #define log_debug(fmt, ...)
 #endif
