@@ -3,6 +3,7 @@
 #include <syslog.h>
 #include <signal.h>
 #include <pthread.h>
+#include <openssl/ssl.h>
 #include "femail.h"
 
 #ifndef DEBUG
@@ -42,6 +43,8 @@ starttlscontext starttlsctx;
 httpcontext		httpctx;
 httpscontext	httpsctx;
 
+SSL_CTX * sslctx = NULL;
+
 void request_stop(int) {
 	log_notice("Stop requested on master service.");
 	stop_signal = 1;
@@ -76,7 +79,56 @@ int main() {
 		log_info("Running as %s.", get_mail_domain());
 	}
 
+	sslctx = SSL_CTX_new(TLS_server_method());
+	uint64_t sslopts = SSL_OP_NO_RENEGOTIATION | SSL_OP_CIPHER_SERVER_PREFERENCE;
+	SSL_CTX_set_options(sslctx,
+						sslopts);
+
+	char certfile[256] = {0};
+	char privfile[256] = {0};
+	if (sprintf(certfile,
+				"/usr/local/share/ca-certificates/%s.crt",
+				get_mail_domain()) < 0) {
+		log_err("Error formatting certificate file.");
+	}
+	if (sprintf(privfile,
+				"/usr/local/share/ca-certificates/%s.key",
+				get_mail_domain()) < 0) {
+		log_err("Error formatting private key file.");
+	}
+
+	log_debug("SSL from %s and %s.", certfile, privfile);
 	
+	if (SSL_CTX_use_certificate_chain_file(sslctx,
+										   certfile) <= 0) {
+		SSL_CTX_free(sslctx);
+		sslctx = NULL;
+		log_err("Failed to load the server certificate chain file");
+	}
+	if (SSL_CTX_use_PrivateKey_file(sslctx,
+									privfile,
+									SSL_FILETYPE_PEM) <= 0) {
+		SSL_CTX_free(sslctx);
+		sslctx = NULL;
+		log_err("Failed to load the server private key file");
+	}
+
+	// TODO: this should be randomized
+	char cache_id[] = "ABCDEFG";
+	if (sslctx != NULL) {
+		SSL_CTX_set_session_id_context(sslctx,
+									   (void *)cache_id,
+									   sizeof(cache_id));
+		SSL_CTX_set_session_cache_mode(sslctx,
+									   SSL_SESS_CACHE_SERVER);
+		SSL_CTX_sess_set_cache_size(sslctx,
+									SSL_SESSION_CACHE_MAX_SIZE_DEFAULT);
+		SSL_CTX_set_timeout(sslctx,
+							3600);
+		SSL_CTX_set_verify(sslctx,
+						   SSL_VERIFY_NONE,
+						   NULL);
+	}
 	
 	if(start_smtp(&smtpctx) != 0) {
 		log_crit("failed to start SMTP service.");
@@ -89,6 +141,9 @@ int main() {
 	}
 	if(start_http(&httpctx) != 0) {
 		log_err("failed to start HTTP service.");
+	}
+	if(start_https(&httpsctx) != 0) {
+		log_err("failed to start HTTPS service.");
 	}
 
 	check_communications(&smtpctx,
@@ -120,6 +175,9 @@ int main() {
 	stop_smtps(&smtpsctx);
 	stop_starttls(&starttlsctx);
 	stop_http(&httpctx);
+	stop_https(&httpsctx);
+
+	SSL_CTX_free(sslctx);
 
 	log_info("Successfully stopped Femail.");
 	closelog();

@@ -34,7 +34,8 @@ int conn_queue_dequeue(ConnectionQueue *,
 
 int get_accept_state(int);
 int handle_connection(ConnectionType,
-					  int);
+					  int,
+					  SSL_STRATEGY);
 void process_connection(void);
 
 #endif //MASTER_H

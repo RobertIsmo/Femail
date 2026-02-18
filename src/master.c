@@ -18,7 +18,22 @@ void connection_init(Connection * conn) {
 	// these two will be set else where
 	// conn->type			= type;
 	// conn->clientsocket	= clientsocket;
-	switch(conn->type) {
+	switch (conn->sslstrat) {
+	case IMPLICIT_TLS:
+		conn->sslconn = SSL_new(sslctx);
+		SSL_set_fd(conn->sslconn,
+				   conn->clientsocket);
+		break;
+	case OPPORTUNISTIC_TLS:
+		// TODO: implement
+		break;
+	case NO_SSL:
+		break;
+	default:
+		log_emerg("Unexpected SSL strategy. aborting...");
+		abort();
+	}
+	switch (conn->type) {
 	case SMTP_CONNECTION:
 	case SMTPS_CONNECTION:
 	case STARTTLS_CONNECTION:
@@ -28,6 +43,9 @@ void connection_init(Connection * conn) {
 	case HTTPS_CONNECTION:
 		conn->state	= HTTP_CONNECTION_OPENED;
 		break;
+	default:
+		log_emerg("Unexpected connection type. aborting...");
+		abort();
 	}
 	conn->alloccount		= 0;
 	conn->messagebuffersize = 0;
@@ -51,6 +69,7 @@ void reset_connection(Connection * conn) {
 
 void connection_deinit(Connection * conn) {
 	conn->live = false;
+	SSL_free(conn->sslconn);
 	free(conn->messagebuffer);
 	close(conn->clientsocket);
 }
@@ -139,7 +158,8 @@ int get_accept_state(int acceptresult) {
 }
 
 int handle_connection(ConnectionType type,
-					  int clientsocket) {
+					  int clientsocket,
+					  SSL_STRATEGY strat) {
 	switch (get_accept_state(clientsocket)) {
 	case ACCEPT_UNBLOCK: return 0;
 	case ACCEPT_ERROR: return 1;
@@ -148,11 +168,12 @@ int handle_connection(ConnectionType type,
 		Connection conn;
 		conn.type = type;
 		conn.clientsocket = clientsocket;
+		conn.sslstrat = strat;
 		connection_init(&conn);
 		if (conn_queue_enqueue(&connqueue,
 							  conn) != 0) {
 			log_err("Failed to enqueue a connection. rejecting...");
-			close(clientsocket);
+			connection_deinit(&conn);
 		}
 		return 0;
 	default:
@@ -233,17 +254,25 @@ void * start_master_service(void *) {
 	
 	while(!is_stopped()) {
 		if (smtpctx.active) {
+			SSL_STRATEGY strat;
+			if (smtpctx.starttls) {
+				strat = OPPORTUNISTIC_TLS;
+			} else {
+				strat = NO_SSL;
+			}
 			if (handle_connection(SMTP_CONNECTION,
 								  accept(smtpctx.socket4,
 										 NULL,
-										 NULL)) != 0) {
+										 NULL),
+								  strat) != 0) {
 				log_err("SMTP: Failed to handle connection on IPv4.");
 			}
 
 			if (handle_connection(SMTP_CONNECTION,
 								  accept(smtpctx.socket6,
 										 NULL,
-										 NULL)) != 0) {
+										 NULL),
+								  strat) != 0) {
 				log_err("SMTP: Failed to handle connection on IPv6.");
 			}
 		}
@@ -252,14 +281,16 @@ void * start_master_service(void *) {
 			if (handle_connection(SMTPS_CONNECTION,
 								  accept(smtpsctx.socket4,
 										 NULL,
-										 NULL)) != 0) {
+										 NULL),
+								  IMPLICIT_TLS) != 0) {
 				log_err("SMTPS: Failed to handle connection on IPv4.");
 			}
 
 			if (handle_connection(SMTPS_CONNECTION,
 								  accept(smtpsctx.socket6,
 										 NULL,
-										 NULL)) != 0) {
+										 NULL),
+								  IMPLICIT_TLS) != 0) {
 				log_err("SMTPS: Failed to handle connection on IPv6.");
 			}
 		}
@@ -268,14 +299,16 @@ void * start_master_service(void *) {
 			if (handle_connection(STARTTLS_CONNECTION,
 								  accept(starttlsctx.socket4,
 										 NULL,
-										 NULL)) != 0) {
+										 NULL),
+								  OPPORTUNISTIC_TLS) != 0) {
 				log_err("StartTLS: Failed to handle connection on IPv4.");
 			}
 
 			if (handle_connection(STARTTLS_CONNECTION,
 								  accept(starttlsctx.socket6,
 										 NULL, 
-										 NULL)) != 0) {
+										 NULL),
+								  OPPORTUNISTIC_TLS) != 0) {
 				log_err("StartTLS: Failed to handle connection on IPv6.");
 			}
 		}
@@ -284,15 +317,35 @@ void * start_master_service(void *) {
 			if (handle_connection(HTTP_CONNECTION,
 								  accept(httpctx.socket4,
 										 NULL,
-										 NULL)) != 0) {
+										 NULL),
+								  NO_SSL) != 0) {
 				log_err("HTTP: Failed to handle connection on IPv4.");
 			}
 
 			if (handle_connection(HTTP_CONNECTION,
 								  accept(httpctx.socket6,
 										 NULL,
-										 NULL)) != 0) {
+										 NULL),
+								  NO_SSL) != 0) {
 				log_err("HTTP: Failed to handle connection on IPv6.");
+			}
+		}
+
+		if (httpsctx.active) {
+			if (handle_connection(HTTPS_CONNECTION,
+								  accept(httpsctx.socket4,
+										 NULL,
+										 NULL),
+								  IMPLICIT_TLS) != 0) {
+				log_err("HTTPS: Failed to handle connection on IPv4.");
+			}
+
+			if (handle_connection(HTTPS_CONNECTION,
+								  accept(httpsctx.socket6,
+										 NULL,
+										 NULL),
+								  IMPLICIT_TLS) != 0) {
+				log_err("HTTPS: Failed to handle connection on IPv6.");
 			}
 		}
 

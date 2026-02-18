@@ -9,6 +9,7 @@ CFLAGS := \
 	-Wredundant-decls -Warray-bounds -Wnonnull -Wfloat-equal \
 	-Wduplicated-cond -Wduplicated-branches -Wlogical-op \
 	-Wuseless-cast
+LIBS := -lssl -lcrypto -lz -lzstd -ldl
 DEBUGFLAGS := \
 	-fsanitize=address,undefined,leak -fno-omit-frame-pointer \
 	-fstack-protector-strong -fno-common -DDEBUG=1
@@ -51,7 +52,7 @@ bin/femail: $(Sources)
 	-DVERSION_UPDATE=$(VERSION_UPDATE) \
 	-DVERSION_RELEASE=$(VERSION_RELEASE) \
 	-DVERSION_TAG=$(VERSION_TAG) \
-	$(CFLAGS) -O2 $(Sources) -o $@
+	$(CFLAGS) -O2 $(Sources) $(LIBS) -o $@
 
 bin/femail-st: $(Sources)
 	$(CC) -DAPP_NAME="\"Femail Mail System(Static)\"" \
@@ -59,7 +60,7 @@ bin/femail-st: $(Sources)
 	-DVERSION_UPDATE=$(VERSION_UPDATE) \
 	-DVERSION_RELEASE=$(VERSION_RELEASE) \
 	-DVERSION_TAG=$(VERSION_TAG) \
-	$(CFLAGS) -O2 -static $(Sources) -o $@
+	$(CFLAGS) -O2 -static $(Sources) $(LIBS) -o $@
 
 bin/debfemail: $(Sources)
 	$(CC) -DAPP_NAME="\"Femail Debug Mail System\"" \
@@ -67,7 +68,7 @@ bin/debfemail: $(Sources)
 	-DVERSION_UPDATE=$(VERSION_UPDATE) \
 	-DVERSION_RELEASE=$(VERSION_RELEASE) \
 	-DVERSION_TAG=$(VERSION_TAG) \
-	$(CFLAGS) $(DEBUGFLAGS) -O1 $(Sources) -o $@
+	$(CFLAGS) $(DEBUGFLAGS) -O1 $(Sources) $(LIBS) -o $@
 
 bin/debfemail-st: $(Sources)
 	$(CC) -DAPP_NAME="\"Femail Debug Mail System(Static)\"" \
@@ -75,7 +76,7 @@ bin/debfemail-st: $(Sources)
 	-DVERSION_UPDATE=$(VERSION_UPDATE) \
 	-DVERSION_RELEASE=$(VERSION_RELEASE) \
 	-DVERSION_TAG=$(VERSION_TAG) \
-	$(CFLAGS) $(STDEBUGFLAGS) -O1 $(Sources) -o $@
+	$(CFLAGS) $(STDEBUGFLAGS) -O1 $(Sources) $(LIBS) -o $@
 
 femail/debian/mail.mailey.femail.crt:
 	openssl req -x509 -newkey rsa:2048 -sha256 -days 365 -nodes \

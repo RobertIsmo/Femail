@@ -5,6 +5,7 @@
 #include <syslog.h>
 #include <time.h>
 #include <signal.h>
+#include <openssl/ssl.h>
 #include "comm.h"
 
 #define NAMEVERSION_SIZE	1024
@@ -56,6 +57,12 @@ typedef enum {
 	HTTP_CONNECTION_OPENED
 } ConnectionState;
 
+typedef enum {
+	NO_SSL,
+	OPPORTUNISTIC_TLS,
+	IMPLICIT_TLS
+} SSL_STRATEGY;
+
 typedef struct {
 	time_t			timeinitialized;
 	time_t			timerefreshed;
@@ -63,6 +70,8 @@ typedef struct {
 	ConnectionType	type;
 	ConnectionState state;
 	int				clientsocket;
+	SSL_STRATEGY	sslstrat;
+	SSL *			sslconn;
 	char			mailclientdomain[DOMAIN_MAX_SIZE];
 	size_t			alloccount;
 	size_t			messagebuffersize;
@@ -115,5 +124,7 @@ extern smtpscontext smtpsctx;
 extern starttlscontext starttlsctx;
 extern httpcontext httpctx;
 extern httpscontext httpsctx;
+
+extern SSL_CTX * sslctx;
 
 #endif //FEMAIL_H

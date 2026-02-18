@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include <sys/socket.h>
+#include <openssl/ssl.h>
 
 #define SMTP_PORT		25
 #define SMTPS_PORT		465
@@ -12,6 +13,7 @@
 
 typedef struct {
 	bool active;
+	bool starttls;
 	int socket4;
 	int socket6;
 } smtpcontext;
