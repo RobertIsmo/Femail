@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <errno.h>
+#include <openssl/ssl.h>
 #include "femail.h"
 #include "smtp.h"
 
@@ -75,6 +76,12 @@ int parse_client_command(SMTPClientCommand * command,
 		command->command = SMTP_EXPN;
 		command->param = buffer + 5;
 		return 0;
+	} else if (strncasecmp(buffer,
+					"STARTTLS",
+					8) == 0) {
+		command->command = SMTP_STARTTLS;
+		command->param = buffer + 8;
+		return 0;
 	} else {
 		return 1;
 	}
@@ -117,6 +124,22 @@ int move_client_mail_domain(char * param,
 	return 0;
 }
 
+ssize_t smtp_receive_msg(Connection * conn,
+						 char * buf,
+						 int nbytes) {
+	if (conn->sslconn != NULL) {
+		log_debug("SMTP: using SSL connection.");
+		return SSL_read(conn->sslconn,
+						buf,
+						nbytes);
+	} else {
+		log_debug("SMTP: using PLAIN connection.");
+		return read(conn->clientsocket,
+					buf,
+					(size_t)nbytes);
+	}
+}
+
 ConnectionHandlerResult smtp_handler(Connection * conn) {
 	if (!conn->live) {
 		log_debug("Processing a dead connection. skipping...");
@@ -150,11 +173,21 @@ ConnectionHandlerResult smtp_handler(Connection * conn) {
 		conn->state = MAIL_CONNECTION_EXPECT_ANY;
 		return CONNECTION_CONTINUE;
 	}
+
+	if (conn->state == MAIL_CONNECTION_EXPECT_TLS_NEG) {
+		if (SSL_accept(conn->sslconn) <= 0) {
+			log_err("Failed TLS negotiation.");
+			smtpsmsg_reject_starttls();
+			return CONNECTION_ERROR;
+		}
+		conn->state = MAIL_CONNECTION_EXPECT_ANY;
+		return CONNECTION_CONTINUE;
+	}
 	
 	char buffer [SMALL_BUFFER_SIZE] = {0};
-	ssize_t readresult = read(conn->clientsocket,
-						  buffer,
-						  SMALL_BUFFER_SIZE);
+	ssize_t readresult = smtp_receive_msg(conn,
+										  buffer,
+										  SMALL_BUFFER_SIZE);
 
 	log_debug("read amount: %ld",
 			  readresult);
@@ -166,6 +199,7 @@ ConnectionHandlerResult smtp_handler(Connection * conn) {
 		if (errno == EWOULDBLOCK) {
 			return CONNECTION_CONTINUE;
 		} else {
+			log_err("%s\n", strerror(errno));
 			return CONNECTION_ERROR;
 		}
 	} else if (readresult == 0) {
@@ -292,6 +326,10 @@ ConnectionHandlerResult smtp_handler(Connection * conn) {
 	case SMTP_EXPN:
 		log_debug("SMTP Handler: handling EXPN...");
 		smtpsmsg_reject_unimplemented();
+		return CONNECTION_CONTINUE;
+	case SMTP_STARTTLS:
+		conn->state = MAIL_CONNECTION_EXPECT_TLS_NEG;
+		smtpsmsg_accept_starttls();
 		return CONNECTION_CONTINUE;
 	default:
 		log_err("Unknown client command being processed %d.",
