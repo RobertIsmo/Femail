@@ -1,7 +1,6 @@
 #ifndef SMTP_H
 #define SMTP_H
 
-#include <stdbool.h>
 #include "femail.h"
 
 #define ESMTP_SIZE			10485760

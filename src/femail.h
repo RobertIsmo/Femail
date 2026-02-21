@@ -1,7 +1,6 @@
 #ifndef FEMAIL_H
 #define FEMAIL_H
 
-#include <stdbool.h>
 #include <syslog.h>
 #include <time.h>
 #include <signal.h>
