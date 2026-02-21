@@ -8,7 +8,7 @@ CFLAGS := \
 	-Wnull-dereference -Wpointer-arith -Wvla -Wwrite-strings \
 	-Wredundant-decls -Warray-bounds -Wnonnull -Wfloat-equal \
 	-Wduplicated-cond -Wduplicated-branches -Wlogical-op \
-	-Wuseless-cast
+	-Wuseless-cast -Wstringop-overflow
 LIBS := -lssl -lcrypto -lz -lzstd -ldl
 DEBUGFLAGS := \
 	-fsanitize=address,undefined,leak -fno-omit-frame-pointer \
