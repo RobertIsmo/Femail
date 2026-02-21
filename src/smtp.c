@@ -140,7 +140,7 @@ ssize_t smtp_receive_msg(Connection * conn,
 	}
 }
 
-ConnectionHandlerResult smtp_handler(Connection * conn) {
+ConnectionHandlerResult smtp_handler(Connection conn[static 1]) {
 	if (!conn->live) {
 		log_debug("Processing a dead connection. skipping...");
 		return CONNECTION_DONE;
@@ -339,12 +339,12 @@ ConnectionHandlerResult smtp_handler(Connection * conn) {
 	}
 }
 
-ConnectionHandlerResult smtps_handler(Connection * conn) {
+ConnectionHandlerResult smtps_handler(Connection conn[static 1]) {
 	smtpsmsg_reject_unimplemented();
 	return CONNECTION_DONE;
 }
 
-ConnectionHandlerResult starttls_handler(Connection * conn) {
+ConnectionHandlerResult starttls_handler(Connection conn[static 1]) {
 	smtpsmsg_reject_starttls();
 	return CONNECTION_DONE;
 }

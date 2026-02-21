@@ -8,39 +8,39 @@
 #include "femail.h"
 #include "comm.h"
 
-void init_smtp(smtpcontext * ctx) {
+void init_smtp(smtpcontext ctx[static 1]) {
 	ctx->active = false;
 	ctx->starttls = false;
 	ctx->socket4 = -1;
 	ctx->socket6 = -1;
 }
 
-void init_smtps(smtpscontext * ctx) {
+void init_smtps(smtpscontext ctx[static 1]) {
 	ctx->active = false;
 	ctx->socket4 = -1;
 	ctx->socket6 = -1;
 }
 
-void init_starttls(starttlscontext * ctx) {
+void init_starttls(starttlscontext ctx[static 1]) {
 	ctx->active = false;
 	ctx->socket4 = -1;
 	ctx->socket6 = -1;
 }
 
-void init_http(httpcontext * ctx) {
+void init_http(httpcontext ctx[static 1]) {
 	ctx->active = false;
 	ctx->socket4 = -1;
 	ctx->socket6 = -1;
 }
 
-void init_https(httpscontext * ctx) {
+void init_https(httpscontext ctx[static 1]) {
 	ctx->active = false;
 	ctx->socket4 = -1;
 	ctx->socket6 = -1;
 }
 
 
-int start_smtp(smtpcontext * ctx) {
+int start_smtp(smtpcontext ctx[static 1]) {
 	if (ctx->active) {
 		return 0;
 	}
@@ -150,7 +150,7 @@ int start_smtp(smtpcontext * ctx) {
 	}
 }
 
-int start_smtps(smtpscontext * ctx) {
+int start_smtps(smtpscontext ctx[static 1]) {
 	if (ctx->active) {
 		return 0;
 	}
@@ -258,7 +258,7 @@ int start_smtps(smtpscontext * ctx) {
 	}
 }
 
-int start_starttls(starttlscontext * ctx) {
+int start_starttls(starttlscontext ctx[static 1]) {
 	if (ctx->active) {
 		return 0;
 	}
@@ -366,7 +366,7 @@ int start_starttls(starttlscontext * ctx) {
 	}
 }
 
-int start_http(httpcontext * ctx) {
+int start_http(httpcontext ctx[static 1]) {
 	if (ctx->active) {
 		return 0;
 	}
@@ -469,7 +469,7 @@ int start_http(httpcontext * ctx) {
 	}
 }
 
-int start_https(httpscontext * ctx) {
+int start_https(httpscontext ctx[static 1]) {
 	if (ctx->active) {
 		return 0;
 	}
@@ -577,16 +577,16 @@ int start_https(httpscontext * ctx) {
 	}
 }
 
-void check_communications(smtpcontext * smtp,
-						 smtpscontext * smtps,
-						 starttlscontext * starttls) {
+void check_communications(smtpcontext    smtp    [static 1],
+						 smtpscontext    smtps   [static 1],
+						 starttlscontext starttls[static 1]) {
 	if (!smtp->active && !smtps->active && !starttls->active) {
 		log_crit("CRIT: no communication services were able to be started. aborting...");
 		abort();
 	}
 }
 
-void stop_smtp(smtpcontext * ctx) {
+void stop_smtp(smtpcontext ctx[static 1]) {
 	if (ctx->socket4 != -1) {
 		close(ctx->socket4);
 		ctx->socket4 = -1;
@@ -599,7 +599,7 @@ void stop_smtp(smtpcontext * ctx) {
 	ctx->active = false;
 }
 
-void stop_smtps(smtpscontext * ctx) {
+void stop_smtps(smtpscontext ctx[static 1]) {
 	if (ctx->socket4 != -1) {
 		close(ctx->socket4);
 		ctx->socket4 = -1;
@@ -611,7 +611,7 @@ void stop_smtps(smtpscontext * ctx) {
 	ctx->active = false;
 }
 
-void stop_starttls(starttlscontext * ctx) {
+void stop_starttls(starttlscontext ctx[static 1]) {
 	if (ctx->socket4 != -1) {
 		close(ctx->socket4);
 		ctx->socket4 = -1;
@@ -623,7 +623,7 @@ void stop_starttls(starttlscontext * ctx) {
 	ctx->active = false;
 }
 
-void stop_http(httpcontext * ctx) {
+void stop_http(httpcontext ctx[static 1]) {
 	if (ctx->socket4 != -1) {
 		close(ctx->socket4);
 		ctx->socket4 = -1;
@@ -635,7 +635,7 @@ void stop_http(httpcontext * ctx) {
 	ctx->active = false;
 }
 
-void stop_https(httpscontext * ctx) {
+void stop_https(httpscontext ctx[static 1]) {
 	if (ctx->socket4 != -1) {
 		close(ctx->socket4);
 		ctx->socket4 = -1;

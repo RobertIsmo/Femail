@@ -87,33 +87,33 @@ int		is_stopped(void);
 int	    dns_init(void);
 char *  get_mail_domain(void);
 
-void	init_smtp(smtpcontext *);
-void	init_smtps(smtpscontext *);
-void	init_starttls(starttlscontext *);
-void	init_http(httpcontext *);
-void	init_https(httpscontext *);
+void	init_smtp    (smtpcontext     [static 1]);
+void	init_smtps   (smtpscontext    [static 1]);
+void	init_starttls(starttlscontext [static 1]);
+void	init_http    (httpcontext     [static 1]);
+void	init_https   (httpscontext    [static 1]);
 
-int	start_smtp(smtpcontext *);
-int	start_smtps(smtpscontext *);
-int	start_starttls(starttlscontext *);
-int	start_http(httpcontext *);
-int	start_https(httpscontext *);
+int	start_smtp    (smtpcontext     [static 1]);
+int	start_smtps   (smtpscontext    [static 1]);
+int	start_starttls(starttlscontext [static 1]);
+int	start_http    (httpcontext     [static 1]);
+int	start_https   (httpscontext    [static 1]);
 
-void check_communications(smtpcontext *,
-						  smtpscontext *,
-						  starttlscontext *);
+void check_communications(smtpcontext     [static 1],
+						  smtpscontext    [static 1],
+						  starttlscontext [static 1]);
 
-void	stop_smtp(smtpcontext *);
-void	stop_smtps(smtpscontext *);
-void	stop_starttls(starttlscontext *);
-void	stop_http(httpcontext *);
-void	stop_https(httpscontext *);
+void	stop_smtp    (smtpcontext     [static 1]);
+void	stop_smtps   (smtpscontext    [static 1]);
+void	stop_starttls(starttlscontext [static 1]);
+void	stop_http    (httpcontext     [static 1]);
+void	stop_https   (httpscontext    [static 1]);
 
-ConnectionHandlerResult smtp_handler(Connection *);
-ConnectionHandlerResult smtps_handler(Connection *);
-ConnectionHandlerResult starttls_handler(Connection *);
-ConnectionHandlerResult http_handler(Connection *);
-ConnectionHandlerResult https_handler(Connection *);
+ConnectionHandlerResult smtp_handler    (Connection [static 1]);
+ConnectionHandlerResult smtps_handler   (Connection [static 1]);
+ConnectionHandlerResult starttls_handler(Connection [static 1]);
+ConnectionHandlerResult http_handler    (Connection [static 1]);
+ConnectionHandlerResult https_handler   (Connection [static 1]);
 
 void *	start_master_service(void *);
 

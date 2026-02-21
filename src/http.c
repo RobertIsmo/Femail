@@ -7,7 +7,7 @@
 #include "femail.h"
 #include "http.h"
 
-ConnectionHandlerResult http_handler(Connection * conn) {
+ConnectionHandlerResult http_handler(Connection conn[static 1]) {
 	if (!conn->live) {
 		log_debug("Processing a dead connection. skipping...");
 		return CONNECTION_DONE;
@@ -48,7 +48,7 @@ ConnectionHandlerResult http_handler(Connection * conn) {
 	return CONNECTION_DONE;
 }
 
-ConnectionHandlerResult https_handler(Connection * conn) {
+ConnectionHandlerResult https_handler(Connection conn[static 1]) {
 	if (!conn->live) {
 		log_debug("Processing a dead connection. skipping...");
 		return CONNECTION_DONE;
