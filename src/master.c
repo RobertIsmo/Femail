@@ -11,7 +11,7 @@
 
 ConnectionQueue connqueue = {0};
 
-void connection_init(Connection * conn) {
+void connection_init(Connection conn[static 1]) {
 	time(&conn->timeinitialized);
 	time(&conn->timerefreshed);
 	conn->live		  = true;
@@ -53,7 +53,7 @@ void connection_init(Connection * conn) {
 	conn->messagebuffer		= NULL;
 }
 
-void reset_connection(Connection * conn) {
+void reset_connection(Connection conn[static 1]) {
 	conn->live		= true;
 	if (conn->state == MAIL_CONNECTION_GREETED) {		
 		conn->state = MAIL_CONNECTION_GREETED;
@@ -67,14 +67,14 @@ void reset_connection(Connection * conn) {
 	conn->messagebuffer		= NULL;
 }
 
-void connection_deinit(Connection * conn) {
+void connection_deinit(Connection conn[static 1]) {
 	conn->live = false;
 	SSL_free(conn->sslconn);
 	free(conn->messagebuffer);
 	close(conn->clientsocket);
 }
 
-int conn_queue_init(ConnectionQueue * queue) {
+int conn_queue_init(ConnectionQueue queue[static 1]) {
 	pthread_mutex_init(&queue->lock,
 					   NULL);
 	queue->count = 0;
@@ -85,7 +85,7 @@ int conn_queue_init(ConnectionQueue * queue) {
 		   CONNECTION_QUEUE_CAPACITY * sizeof(Connection));
 	return 0;
 }
-size_t conn_queue_count(ConnectionQueue * queue) {
+size_t conn_queue_count(ConnectionQueue queue[static 1]) {
 	if (pthread_mutex_lock(&queue->lock) != 0) {
 		log_alert("Mutex lock failure, system may begin failing.");
 		return 0;
@@ -97,7 +97,7 @@ size_t conn_queue_count(ConnectionQueue * queue) {
 	}
 	return result;
 }
-int conn_queue_enqueue(ConnectionQueue * queue,
+int conn_queue_enqueue(ConnectionQueue queue[static 1],
 					  Connection conn) {
 	if (pthread_mutex_lock(&queue->lock) != 0) {
 		log_alert("Mutex lock failure, system may begin failing.");
@@ -122,8 +122,8 @@ int conn_queue_enqueue(ConnectionQueue * queue,
 	return 0;
 }
 
-int conn_queue_dequeue(ConnectionQueue * queue,
-					  Connection * conn) {
+int conn_queue_dequeue(ConnectionQueue queue[static 1],
+					  Connection conn[static 1]) {
 	if (pthread_mutex_lock(&queue->lock) != 0) {
 		log_alert("Mutex lock failure, system may begin failing.");
 		return 1;

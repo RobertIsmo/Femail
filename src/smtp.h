@@ -70,12 +70,12 @@ typedef struct {
 
 bool	ends_word(char);
 bool	found_crlf_end(char *);
-int parse_client_command(SMTPClientCommand *,
+int parse_client_command(SMTPClientCommand [static 1],
 						 char *);
 int		move_client_mail_domain(char *,
-								Connection *,
+								Connection [static 1],
 								size_t);
-ssize_t smtp_receive_msg(Connection *,
+ssize_t smtp_receive_msg(Connection [static 1],
 						 char *,
 						 int);
 #endif //SMTP_H

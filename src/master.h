@@ -21,16 +21,16 @@ typedef struct {
 	Connection data[CONNECTION_QUEUE_CAPACITY];
 } ConnectionQueue;
 
-void connection_init(Connection *);
-void reset_connection(Connection *);
-void connection_deinit(Connection *);
+void connection_init  (Connection [static 1]);
+void reset_connection (Connection [static 1]);
+void connection_deinit(Connection [static 1]);
 
-int conn_queue_init(ConnectionQueue *);
-size_t conn_queue_count(ConnectionQueue *);
-int conn_queue_enqueue(ConnectionQueue *,
-				  Connection);
-int conn_queue_dequeue(ConnectionQueue *,
-					   Connection *);
+int conn_queue_init    (ConnectionQueue [static 1]);
+size_t conn_queue_count(ConnectionQueue [static 1]);
+int conn_queue_enqueue (ConnectionQueue [static 1],
+						Connection);
+int conn_queue_dequeue (ConnectionQueue [static 1],
+						Connection      [static 1]);
 
 int get_accept_state(int);
 int handle_connection(ConnectionType,

@@ -8,7 +8,7 @@
 #include "femail.h"
 #include "smtp.h"
 
-int parse_client_command(SMTPClientCommand * command,
+int parse_client_command(SMTPClientCommand command[static 1],
 						 char * buffer) {
 	if (strncasecmp(buffer,
 					"NOOP",
@@ -108,7 +108,7 @@ bool found_crlf_end(char * str) {
 }
 
 int move_client_mail_domain(char * param,
-							Connection * conn,
+							Connection conn[static 1],
 							size_t max) {
 	size_t offset = 0;
 	char * current = param;
@@ -124,7 +124,7 @@ int move_client_mail_domain(char * param,
 	return 0;
 }
 
-ssize_t smtp_receive_msg(Connection * conn,
+ssize_t smtp_receive_msg(Connection conn[static 1],
 						 char * buf,
 						 int nbytes) {
 	if (conn->sslconn != NULL) {
