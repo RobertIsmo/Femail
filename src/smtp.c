@@ -13,25 +13,25 @@ int parse_client_command(SMTPClientCommand command[static 1],
 					"NOOP",
 					4) == 0) {
 		command->command = SMTP_NOOP;
-		command->param = NULL;
+		command->param = nullptr;
 		return 0;
 	} else if (strncasecmp(buffer,
 					"QUIT",
 					4) == 0) {
 		command->command = SMTP_QUIT;
-		command->param = NULL;
+		command->param = nullptr;
 		return 0;
 	} else if (strncasecmp(buffer,
 					"RSET",
 					4) == 0) {
 		command->command = SMTP_RSET;
-		command->param = NULL;
+		command->param = nullptr;
 		return 0;
 	} else if (strncasecmp(buffer,
 					"DATA",
 					4) == 0) {
 		command->command = SMTP_DATA;
-		command->param = NULL;
+		command->param = nullptr;
 		return 0;
 	} else if (strncasecmp(buffer,
 					"HELP",
@@ -126,7 +126,7 @@ int move_client_mail_domain(char * param,
 ssize_t smtp_receive_msg(Connection conn[static 1],
 						 char * buf,
 						 int nbytes) {
-	if (conn->sslconn != NULL) {
+	if (conn->sslconn != nullptr) {
 		log_debug("SMTP: using SSL connection.");
 		return SSL_read(conn->sslconn,
 						buf,
@@ -219,7 +219,7 @@ ConnectionHandlerResult smtp_handler(Connection conn[static 1]) {
 		}
 		conn->messagebuffer = realloc(conn->messagebuffer,
 									  messagebuffersize);
-		if (conn->messagebuffer == NULL) {
+		if (conn->messagebuffer == nullptr) {
 			log_err("Allocation Error");
 			smtpsmsg_reject_error();
 			return CONNECTION_ERROR;

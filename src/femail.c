@@ -43,7 +43,7 @@ starttlscontext starttlsctx;
 httpcontext		httpctx;
 httpscontext	httpsctx;
 
-SSL_CTX * sslctx = NULL;
+SSL_CTX * sslctx = nullptr;
 
 void request_stop(int) {
 	log_notice("Stop requested on master service.");
@@ -102,20 +102,20 @@ int main() {
 	if (SSL_CTX_use_certificate_chain_file(sslctx,
 										   certfile) <= 0) {
 		SSL_CTX_free(sslctx);
-		sslctx = NULL;
+		sslctx = nullptr;
 		log_err("Failed to load the server certificate chain file");
 	}
 	if (SSL_CTX_use_PrivateKey_file(sslctx,
 									privfile,
 									SSL_FILETYPE_PEM) <= 0) {
 		SSL_CTX_free(sslctx);
-		sslctx = NULL;
+		sslctx = nullptr;
 		log_err("Failed to load the server private key file");
 	}
 
 	// TODO: this should be randomized
 	char cache_id[] = "ABCDEFG";
-	if (sslctx != NULL) {
+	if (sslctx != nullptr) {
 		SSL_CTX_set_session_id_context(sslctx,
 									   (void *)cache_id,
 									   sizeof(cache_id));
@@ -127,7 +127,7 @@ int main() {
 							3600);
 		SSL_CTX_set_verify(sslctx,
 						   SSL_VERIFY_NONE,
-						   NULL);
+						   nullptr);
 	}
 	
 	if(start_smtp(&smtpctx) != 0) {
@@ -158,16 +158,16 @@ int main() {
 	pthread_t mastert;
 
 	if (pthread_create(&mastert,
-					   NULL,
+					   nullptr,
 					   start_master_service,
-					   NULL) != 0) {
+					   nullptr) != 0) {
 		log_err("Unable to start master thread.");
 		abort();
 	}
 	
 	log_info("%s is currently running and operational.", nameversion);
 
-	pthread_join(mastert, NULL);
+	pthread_join(mastert, nullptr);
 	
 	log_info("Stopping Femail...");
 

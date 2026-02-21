@@ -27,7 +27,7 @@ typedef struct {
 
 #define smtp_send_msg(connection, fmt, ...)		\
 	do {										\
-		if (conn->sslconn != NULL) {			\
+		if (conn->sslconn != nullptr) {			\
 			char msgbuf[256];					\
 			int len = snprintf(msgbuf,			\
 							   sizeof(msgbuf),	\

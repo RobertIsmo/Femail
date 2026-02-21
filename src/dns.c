@@ -13,7 +13,7 @@ char * get_mail_domain(void) {
 
 int dns_init(void) {
 	char * domain = getenv("MAIL_DOMAIN");
-	if (domain == NULL) {
+	if (domain == nullptr) {
 		log_warn("Cannot find a valid mail domain.");
 		return 1;
 	}

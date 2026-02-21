@@ -50,7 +50,7 @@ void connection_init(Connection conn[static 1]) {
 	conn->alloccount		= 0;
 	conn->messagebuffersize = 0;
 	conn->messagebufferend  = 0;
-	conn->messagebuffer		= NULL;
+	conn->messagebuffer		= nullptr;
 }
 
 void reset_connection(Connection conn[static 1]) {
@@ -64,7 +64,7 @@ void reset_connection(Connection conn[static 1]) {
 	conn->messagebuffersize = 0;
 	conn->messagebufferend  = 0;
 	free(conn->messagebuffer);
-	conn->messagebuffer		= NULL;
+	conn->messagebuffer		= nullptr;
 }
 
 void connection_deinit(Connection conn[static 1]) {
@@ -76,7 +76,7 @@ void connection_deinit(Connection conn[static 1]) {
 
 int conn_queue_init(ConnectionQueue queue[static 1]) {
 	pthread_mutex_init(&queue->lock,
-					   NULL);
+					   nullptr);
 	queue->count = 0;
 	queue->head = 0;
 	queue->tail = 0;
@@ -249,7 +249,7 @@ void * start_master_service(void *) {
 
 	if(conn_queue_init(&connqueue) != 0) {
 		log_err("Couldn't initialize the mail connection queue.");
-		return NULL;
+		return nullptr;
 	}
 	
 	while(!is_stopped()) {
@@ -262,16 +262,16 @@ void * start_master_service(void *) {
 			}
 			if (handle_connection(SMTP_CONNECTION,
 								  accept(smtpctx.socket4,
-										 NULL,
-										 NULL),
+										 nullptr,
+										 nullptr),
 								  strat) != 0) {
 				log_err("SMTP: Failed to handle connection on IPv4.");
 			}
 
 			if (handle_connection(SMTP_CONNECTION,
 								  accept(smtpctx.socket6,
-										 NULL,
-										 NULL),
+										 nullptr,
+										 nullptr),
 								  strat) != 0) {
 				log_err("SMTP: Failed to handle connection on IPv6.");
 			}
@@ -280,16 +280,16 @@ void * start_master_service(void *) {
 		if (smtpsctx.active) {
 			if (handle_connection(SMTPS_CONNECTION,
 								  accept(smtpsctx.socket4,
-										 NULL,
-										 NULL),
+										 nullptr,
+										 nullptr),
 								  IMPLICIT_TLS) != 0) {
 				log_err("SMTPS: Failed to handle connection on IPv4.");
 			}
 
 			if (handle_connection(SMTPS_CONNECTION,
 								  accept(smtpsctx.socket6,
-										 NULL,
-										 NULL),
+										 nullptr,
+										 nullptr),
 								  IMPLICIT_TLS) != 0) {
 				log_err("SMTPS: Failed to handle connection on IPv6.");
 			}
@@ -298,16 +298,16 @@ void * start_master_service(void *) {
 		if (starttlsctx.active) {
 			if (handle_connection(STARTTLS_CONNECTION,
 								  accept(starttlsctx.socket4,
-										 NULL,
-										 NULL),
+										 nullptr,
+										 nullptr),
 								  OPPORTUNISTIC_TLS) != 0) {
 				log_err("StartTLS: Failed to handle connection on IPv4.");
 			}
 
 			if (handle_connection(STARTTLS_CONNECTION,
 								  accept(starttlsctx.socket6,
-										 NULL, 
-										 NULL),
+										 nullptr, 
+										 nullptr),
 								  OPPORTUNISTIC_TLS) != 0) {
 				log_err("StartTLS: Failed to handle connection on IPv6.");
 			}
@@ -316,16 +316,16 @@ void * start_master_service(void *) {
 		if (httpctx.active) {
 			if (handle_connection(HTTP_CONNECTION,
 								  accept(httpctx.socket4,
-										 NULL,
-										 NULL),
+										 nullptr,
+										 nullptr),
 								  NO_SSL) != 0) {
 				log_err("HTTP: Failed to handle connection on IPv4.");
 			}
 
 			if (handle_connection(HTTP_CONNECTION,
 								  accept(httpctx.socket6,
-										 NULL,
-										 NULL),
+										 nullptr,
+										 nullptr),
 								  NO_SSL) != 0) {
 				log_err("HTTP: Failed to handle connection on IPv6.");
 			}
@@ -334,16 +334,16 @@ void * start_master_service(void *) {
 		if (httpsctx.active) {
 			if (handle_connection(HTTPS_CONNECTION,
 								  accept(httpsctx.socket4,
-										 NULL,
-										 NULL),
+										 nullptr,
+										 nullptr),
 								  IMPLICIT_TLS) != 0) {
 				log_err("HTTPS: Failed to handle connection on IPv4.");
 			}
 
 			if (handle_connection(HTTPS_CONNECTION,
 								  accept(httpsctx.socket6,
-										 NULL,
-										 NULL),
+										 nullptr,
+										 nullptr),
 								  IMPLICIT_TLS) != 0) {
 				log_err("HTTPS: Failed to handle connection on IPv6.");
 			}
@@ -354,5 +354,5 @@ void * start_master_service(void *) {
 
 	log_info("Master service stopped successfully.");
 
-	return NULL;
+	return nullptr;
 }
