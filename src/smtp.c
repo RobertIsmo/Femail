@@ -174,10 +174,18 @@ ConnectionHandlerResult smtp_handler(Connection conn[static 1]) {
 	}
 
 	if (conn->state == MAIL_CONNECTION_EXPECT_TLS_NEG) {
-		if (SSL_accept(conn->sslconn) <= 0) {
-			log_err("Failed TLS negotiation.");
-			smtpsmsg_reject_starttls();
-			return CONNECTION_ERROR;
+		int acceptresult = SSL_accept(conn->sslconn);
+		if (acceptresult <= 0) {
+			int sslerr = SSL_get_error(conn->sslconn,
+									   acceptresult);
+			switch(sslerr) {
+			case SSL_ERROR_WANT_READ:
+			case SSL_ERROR_WANT_WRITE:
+				return CONNECTION_CONTINUE;
+			default:
+				log_err("Failed TLS negotiation %d.", sslerr);
+				return CONNECTION_ERROR;
+			}
 		}
 		conn->state = MAIL_CONNECTION_EXPECT_ANY;
 		return CONNECTION_CONTINUE;
@@ -329,6 +337,9 @@ ConnectionHandlerResult smtp_handler(Connection conn[static 1]) {
 	case SMTP_STARTTLS:
 		conn->state = MAIL_CONNECTION_EXPECT_TLS_NEG;
 		smtpsmsg_accept_starttls();
+		conn->sslconn = SSL_new(sslctx);
+		SSL_set_fd(conn->sslconn,
+				   conn->clientsocket);
 		return CONNECTION_CONTINUE;
 	default:
 		log_err("Unknown client command being processed %d.",

@@ -25,7 +25,9 @@ void connection_init(Connection conn[static 1]) {
 				   conn->clientsocket);
 		break;
 	case OPPORTUNISTIC_TLS:
-		// TODO: implement
+		// TODO: for now I will handle this on the connection handler
+		// However this may not be the long term solution.
+		// Revisit later
 		break;
 	case NO_SSL:
 		break;
