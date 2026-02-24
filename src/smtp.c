@@ -243,8 +243,9 @@ ConnectionHandlerResult smtp_handler(Connection conn[static 1]) {
 			log_debug("Found the CRLF!");
 			conn->state = MAIL_CONNECTION_GREETED;
 			smtpsmsg_accept_ok();
-			log_debug("\n%s\n",
-					  conn->messagebuffer);
+
+			// Data section
+			
 			return CONNECTION_RESET;
 		}
 		log_debug("Continuing.");
