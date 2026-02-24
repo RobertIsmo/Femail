@@ -1,0 +1,6 @@
+CompileFlags:
+  Add:
+    - -xc
+    - -std=c23
+    - -Wall
+    - -Wextra
