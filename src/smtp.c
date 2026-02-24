@@ -350,11 +350,26 @@ ConnectionHandlerResult smtp_handler(Connection conn[static 1]) {
 }
 
 ConnectionHandlerResult smtps_handler(Connection conn[static 1]) {
+	if (!conn->live) {
+		log_debug("Processing a dead connection. skipping...");
+		return CONNECTION_DONE;
+	}
+
+	if (SSL_accept(conn->sslconn) <= 0) {
+		log_debug("Failed TLS negotiation.");
+		return CONNECTION_ERROR;
+	}
+	
 	smtpsmsg_reject_unimplemented();
 	return CONNECTION_DONE;
 }
 
 ConnectionHandlerResult starttls_handler(Connection conn[static 1]) {
+	if (!conn->live) {
+		log_debug("Processing a dead connection. skipping...");
+		return CONNECTION_DONE;
+	}
+	
 	smtpsmsg_reject_starttls();
 	return CONNECTION_DONE;
 }
