@@ -31,7 +31,8 @@ all: femail/debian/debfemail \
 	femail/scratch/debfemail-st \
 	bin/femail bin/femail-st
 
-up: femail/debian/debfemail femail/scratch/debfemail-st femail/debian/mail.mailey.femail.crt all femail/scratch/mail.failey.femail.crt
+up: femail/debian/debfemail femail/scratch/debfemail-st all
+	$(CONTAINER_TOOL) build -t femailbase .
 	$(CONTAINER_TOOL)-compose up -d --build
 
 down:
@@ -78,18 +79,23 @@ bin/debfemail-st: $(Sources)
 	-DVERSION_TAG=$(VERSION_TAG) \
 	$(CFLAGS) $(STDEBUGFLAGS) -O1 $(Sources) $(LIBS) -o $@
 
+certs: femail/debian/mail.mailey.femail.crt femail/scratch/mail.failey.femail.crt
+
 femail/debian/mail.mailey.femail.crt:
 	openssl req -x509 -newkey rsa:2048 -sha256 -days 365 -nodes \
-	-keyout femail/debian/mail.mailey.femail.key \
-	-out femail/debian/mail.mailey.femail.crt \
-	-subj "/CN=mail.mailey.femail" \
-	-addext "subjectAltName=DNS:mail.mailey.femail"
-
+		-keyout ca/mail.mailey.femail.key \
+		-out ca/mail.mailey.femail.crt \
+		-subj "/CN=mail.mailey.femail" \
+		-addext "subjectAltName=DNS:mail.mailey.femail"
+	install -T ca/mail.mailey.femail.key femail/debian/mail.mailey.femail.key
+	install -T ca/mail.mailey.femail.crt femail/debian/mail.mailey.femail.crt
 femail/scratch/mail.failey.femail.crt:
 	openssl req -x509 -newkey rsa:2048 -sha256 -days 365 -nodes \
-	-keyout femail/scratch/mail.failey.femail.key \
-	-out femail/scratch/mail.failey.femail.crt \
-	-subj "/CN=mail.failey.femail" \
-	-addext "subjectAltName=DNS:mail.failey.femail"
+		-keyout ca/mail.failey.femail.key \
+		-out ca/mail.failey.femail.crt \
+		-subj "/CN=mail.failey.femail" \
+		-addext "subjectAltName=DNS:mail.failey.femail"
+	install -T ca/mail.failey.femail.key femail/scratch/mail.failey.femail.key
+	install -T ca/mail.failey.femail.crt femail/scratch/mail.failey.femail.crt
 
-.PHONY: all up down logs
+.PHONY: all up down logs certs

@@ -1,4 +1,4 @@
-from docker.io/debian
+from femailbase
 
 run apt-get update
 run DEBIAN_FRONTEND=noninteractive apt-get install -y \

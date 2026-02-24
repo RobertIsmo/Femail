@@ -9,7 +9,8 @@ networks:
           gateway: 192.168.3.1
 services:
   nameserver:
-    image: localhost/femail_nameserver
+    image: femail_nameserver
+    pull_policy: never
     build: ./nameserver/
     networks:
       internal:
@@ -21,7 +22,8 @@ services:
       - "53:53/tcp"
       - "953:953/tcp"
   mailey:
-    image: localhost/femail_mailey_machine
+    image: femail_mailey_machine
+    pull_policy: never
     hostname: mailey.femail
     dns: 192.168.3.3
     environment:
@@ -32,7 +34,8 @@ services:
       internal:
         ipv4_address: 192.168.3.4
   rats:
-    image: localhost/femail_rats_machine
+    image: femail_rats_machine
+    pull_policy: never
     hostname: rats.femail
     dns: 192.168.3.3
     build:
@@ -43,7 +46,8 @@ services:
       internal:
         ipv4_address: 192.168.3.5
   mice:
-    image: localhost/femail_mice_machine
+    image: femail_mice_machine
+    pull_policy: never
     hostname: mice.femail
     dns: 192.168.3.3
     build:
@@ -54,7 +58,8 @@ services:
       internal:
         ipv4_address: 192.168.3.6
   failey:
-    image: localhost/femail_failey_machine
+    image: femail_failey_machine
+    pull_policy: never
     hostname: failey.femail
     dns: 192.168.3.3
     environment:
@@ -66,7 +71,8 @@ services:
         ipv4_address: 192.168.3.7
   mailless:
     tty: true
-    image: localhost/femail_mailless_machine
+    image: femail_mailless_machine
+    pull_policy: never
     hostname: mailless.femail
     dns: 192.168.3.3
     build:
