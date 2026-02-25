@@ -54,7 +54,7 @@ int is_stopped(void) {
 	return stop_signal;
 }
 
-
+#ifndef LIB_MODE
 int main() {
 	snprintf(nameversion,
 			 NAMEVERSION_SIZE,
@@ -183,3 +183,4 @@ int main() {
 	closelog();
 	return 0;
 }
+#endif

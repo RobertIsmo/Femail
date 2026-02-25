@@ -1,4 +1,5 @@
 CC := gcc
+WCC := clang-19
 CONTAINER_TOOL=podman
 CFLAGS := \
 	-std=c23 -pthread \
@@ -17,6 +18,7 @@ DEBUGFLAGS := \
 STDEBUGFLAGS := \
 	-static -fno-omit-frame-pointer \
 	-fstack-protector-strong -fno-common -DDEBUG=1
+WCFLAGS := --target=wasm32 -nostdlib -Wl,--no-entry -Wl,--export-all
 
 VERSION_PATCH=0
 VERSION_UPDATE=0
@@ -26,10 +28,14 @@ VERSION_TAG="\"-rc\""
 Sources := \
 	src/femail.c src/comm.c src/master.c src/dns.c src/smtp.c \
 	src/http.c
+WModules := \
+	dumby
+WTargets := $(addprefix bin/modules/,$(addsuffix .wasm,$(WModules)))
 
 all: femail/debian/debfemail \
 	femail/scratch/debfemail-st \
-	bin/femail bin/femail-st
+	bin/femail bin/femail-st \
+	$(WTargets)
 
 up: femail/debian/debfemail femail/scratch/debfemail-st all
 	$(CONTAINER_TOOL) build -t femailbase .
@@ -78,6 +84,9 @@ bin/debfemail-st: $(Sources)
 	-DVERSION_RELEASE=$(VERSION_RELEASE) \
 	-DVERSION_TAG=$(VERSION_TAG) \
 	$(CFLAGS) $(STDEBUGFLAGS) -O1 $(Sources) $(LIBS) -o $@
+
+bin/modules/%.wasm: src/modules/%.c
+	$(WCC) $(WCFLAGS) $< -o $@
 
 certs: femail/debian/mail.mailey.femail.crt femail/scratch/mail.failey.femail.crt
 
