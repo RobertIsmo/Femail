@@ -1,6 +1,8 @@
+bin/femail
+bin/femail-st
 debfemail
 debfemail-st
-bin/
+*.wasm
 *.crt
 *.key
 *.csr
