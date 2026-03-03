@@ -25,9 +25,8 @@ VERSION_UPDATE=0
 VERSION_RELEASE=0
 VERSION_TAG="\"-rc\""
 
-Sources := \
-	src/femail.c src/comm.c src/master.c src/dns.c src/smtp.c \
-	src/http.c
+Sources := $(wildcard src/*.c)
+Headers := $(wildcard src/*.h)
 WModules := \
 	dumby
 
@@ -59,7 +58,7 @@ femail/debian/debfemail: bin/debfemail
 femail/scratch/debfemail-st: bin/debfemail-st
 	install $< $@
 
-bin/femail: $(Sources)
+bin/femail: $(Sources) $(Headers)
 	$(CC) -DAPP_NAME="\"Femail Mail System\"" \
 	-DVERSION_PATCH=$(VERSION_PATCH) \
 	-DVERSION_UPDATE=$(VERSION_UPDATE) \
@@ -67,7 +66,7 @@ bin/femail: $(Sources)
 	-DVERSION_TAG=$(VERSION_TAG) \
 	$(CFLAGS) -O2 $(Sources) $(LIBS) -o $@
 
-bin/femail-st: $(Sources)
+bin/femail-st: $(Sources) $(Headers)
 	$(CC) -DAPP_NAME="\"Femail Mail System(Static)\"" \
 	-DVERSION_PATCH=$(VERSION_PATCH) \
 	-DVERSION_UPDATE=$(VERSION_UPDATE) \
@@ -75,7 +74,7 @@ bin/femail-st: $(Sources)
 	-DVERSION_TAG=$(VERSION_TAG) \
 	$(CFLAGS) -O2 -static $(Sources) $(LIBS) -o $@
 
-bin/debfemail: $(Sources)
+bin/debfemail: $(Sources) $(Headers)
 	$(CC) -DAPP_NAME="\"Femail Debug Mail System\"" \
 	-DVERSION_PATCH=$(VERSION_PATCH) \
 	-DVERSION_UPDATE=$(VERSION_UPDATE) \
@@ -83,7 +82,7 @@ bin/debfemail: $(Sources)
 	-DVERSION_TAG=$(VERSION_TAG) \
 	$(CFLAGS) $(DEBUGFLAGS) -O1 $(Sources) $(LIBS) -o $@
 
-bin/debfemail-st: $(Sources)
+bin/debfemail-st: $(Sources) $(Headers)
 	$(CC) -DAPP_NAME="\"Femail Debug Mail System(Static)\"" \
 	-DVERSION_PATCH=$(VERSION_PATCH) \
 	-DVERSION_UPDATE=$(VERSION_UPDATE) \
