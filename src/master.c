@@ -76,7 +76,7 @@ void connection_deinit(Connection conn[static 1]) {
 	close(conn->clientsocket);
 }
 
-int conn_queue_init(ConnectionQueue queue[static 1]) {
+Result conn_queue_init(ConnectionQueue queue[static 1]) {
 	pthread_mutex_init(&queue->lock,
 					   nullptr);
 	queue->count = 0;
@@ -99,7 +99,7 @@ size_t conn_queue_count(ConnectionQueue queue[static 1]) {
 	}
 	return result;
 }
-int conn_queue_enqueue(ConnectionQueue queue[static 1],
+Result conn_queue_enqueue(ConnectionQueue queue[static 1],
 					  Connection conn) {
 	if (pthread_mutex_lock(&queue->lock) != 0) {
 		log_alert("Mutex lock failure, system may begin failing.");
@@ -124,7 +124,7 @@ int conn_queue_enqueue(ConnectionQueue queue[static 1],
 	return 0;
 }
 
-int conn_queue_dequeue(ConnectionQueue queue[static 1],
+Result conn_queue_dequeue(ConnectionQueue queue[static 1],
 					  Connection conn[static 1]) {
 	if (pthread_mutex_lock(&queue->lock) != 0) {
 		log_alert("Mutex lock failure, system may begin failing.");
@@ -147,7 +147,7 @@ int conn_queue_dequeue(ConnectionQueue queue[static 1],
 	return 0;
 }
 
-int get_accept_state(int acceptresult) {
+ACCEPT_STATE get_accept_state(int acceptresult) {
 	if (acceptresult == -1) {
 		if (errno == EWOULDBLOCK) {
 			return ACCEPT_UNBLOCK;
@@ -159,7 +159,7 @@ int get_accept_state(int acceptresult) {
 	}	
 }
 
-int handle_connection(ConnectionType type,
+Result handle_connection(ConnectionType type,
 					  int clientsocket,
 					  SSL_STRATEGY strat) {
 	switch (get_accept_state(clientsocket)) {

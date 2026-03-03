@@ -7,7 +7,7 @@
 #include "femail.h"
 #include "smtp.h"
 
-int parse_client_command(SMTPClientCommand command[static 1],
+Result parse_client_command(SMTPClientCommand command[static 1],
 						 char * buffer) {
 	if (strncasecmp(buffer,
 					"NOOP",
@@ -106,7 +106,7 @@ bool found_crlf_end(char * str) {
 	return false;
 }
 
-int move_client_mail_domain(char * param,
+Result move_client_mail_domain(char * param,
 							Connection conn[static 1],
 							size_t max) {
 	size_t offset = 0;

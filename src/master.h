@@ -25,17 +25,17 @@ void connection_init  (Connection [static 1]);
 void reset_connection (Connection [static 1]);
 void connection_deinit(Connection [static 1]);
 
-int conn_queue_init    (ConnectionQueue [static 1]);
-size_t conn_queue_count(ConnectionQueue [static 1]);
-int conn_queue_enqueue (ConnectionQueue [static 1],
-						Connection);
-int conn_queue_dequeue (ConnectionQueue [static 1],
-						Connection      [static 1]);
+Result conn_queue_init    (ConnectionQueue [static 1]);
+size_t conn_queue_count   (ConnectionQueue [static 1]);
+Result conn_queue_enqueue (ConnectionQueue [static 1],
+						   Connection);
+Result conn_queue_dequeue (ConnectionQueue [static 1],
+						   Connection      [static 1]);
 
-int get_accept_state(int);
-int handle_connection(ConnectionType,
-					  int,
-					  SSL_STRATEGY);
+ACCEPT_STATE get_accept_state(int);
+Result handle_connection(ConnectionType,
+						 int,
+						 SSL_STRATEGY);
 void process_connection(void);
 
 #endif //MASTER_H

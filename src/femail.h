@@ -7,6 +7,9 @@
 #include <openssl/ssl.h>
 #include "comm.h"
 
+// Result is successful if 0, a failure otherwise.
+#define Result int
+
 #define NAMEVERSION_SIZE	1024
 #define DOMAIN_MAX_SIZE		255
 #define SMALL_BUFFER_SIZE	1024
@@ -83,7 +86,7 @@ typedef struct {
 void	request_stop(int);
 int		is_stopped(void);
 
-int	    dns_init(void);
+Result	dns_init(void);
 char *  get_mail_domain(void);
 
 void	init_smtp    (smtpcontext     [static 1]);
@@ -92,11 +95,11 @@ void	init_starttls(starttlscontext [static 1]);
 void	init_http    (httpcontext     [static 1]);
 void	init_https   (httpscontext    [static 1]);
 
-int	start_smtp    (smtpcontext     [static 1]);
-int	start_smtps   (smtpscontext    [static 1]);
-int	start_starttls(starttlscontext [static 1]);
-int	start_http    (httpcontext     [static 1]);
-int	start_https   (httpscontext    [static 1]);
+Result	start_smtp    (smtpcontext     [static 1]);
+Result	start_smtps   (smtpscontext    [static 1]);
+Result	start_starttls(starttlscontext [static 1]);
+Result	start_http    (httpcontext     [static 1]);
+Result	start_https   (httpscontext    [static 1]);
 
 void check_communications(smtpcontext     [static 1],
 						  smtpscontext    [static 1],

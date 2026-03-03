@@ -40,7 +40,7 @@ void init_https(httpscontext ctx[static 1]) {
 }
 
 
-int start_smtp(smtpcontext ctx[static 1]) {
+Result start_smtp(smtpcontext ctx[static 1]) {
 	if (ctx->active) {
 		return 0;
 	}
@@ -150,7 +150,7 @@ int start_smtp(smtpcontext ctx[static 1]) {
 	}
 }
 
-int start_smtps(smtpscontext ctx[static 1]) {
+Result start_smtps(smtpscontext ctx[static 1]) {
 	if (ctx->active) {
 		return 0;
 	}
@@ -258,7 +258,7 @@ int start_smtps(smtpscontext ctx[static 1]) {
 	}
 }
 
-int start_starttls(starttlscontext ctx[static 1]) {
+Result start_starttls(starttlscontext ctx[static 1]) {
 	if (ctx->active) {
 		return 0;
 	}
@@ -366,7 +366,7 @@ int start_starttls(starttlscontext ctx[static 1]) {
 	}
 }
 
-int start_http(httpcontext ctx[static 1]) {
+Result start_http(httpcontext ctx[static 1]) {
 	if (ctx->active) {
 		return 0;
 	}
@@ -469,7 +469,7 @@ int start_http(httpcontext ctx[static 1]) {
 	}
 }
 
-int start_https(httpscontext ctx[static 1]) {
+Result start_https(httpscontext ctx[static 1]) {
 	if (ctx->active) {
 		return 0;
 	}
