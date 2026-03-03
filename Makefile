@@ -30,9 +30,15 @@ Sources := \
 	src/http.c
 WModules := \
 	dumby
+
+TAGS_TARGET := \
+	$(shell find src -path 'src/modules' -prune -o -name '*.[ch]' -print) \
+	$(shell find wamr/core -name '*.[ch]' -print)
 WTargets := $(addprefix bin/modules/,$(addsuffix .wasm,$(WModules)))
 
-all: femail/debian/debfemail \
+all: \
+	TAGS \
+	femail/debian/debfemail \
 	femail/scratch/debfemail-st \
 	bin/femail bin/femail-st \
 	$(WTargets)
@@ -87,6 +93,9 @@ bin/debfemail-st: $(Sources)
 
 bin/modules/%.wasm: src/modules/%.c
 	$(WCC) $(WCFLAGS) $< -o $@
+
+TAGS: $(TAGS_TARGET)
+	etags --declarations --members --ignore-indentation -o TAGS $^
 
 certs: femail/debian/mail.mailey.femail.crt femail/scratch/mail.failey.femail.crt
 
