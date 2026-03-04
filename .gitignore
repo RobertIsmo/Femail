@@ -3,6 +3,7 @@ bin/femail
 bin/femail-st
 debfemail
 debfemail-st
+bin/wamr
 *.wasm
 *.crt
 *.key

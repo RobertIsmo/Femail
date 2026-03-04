@@ -27,13 +27,14 @@ VERSION_TAG="\"-rc\""
 
 Sources := $(wildcard src/*.c)
 Headers := $(wildcard src/*.h)
-WModules := \
-	dumby
+WModules := $(notdir $(wildcard src/modules/*))
+Deps := \
+	bin/wamr/libiwasm.a
 
+WTargets := $(addprefix bin/modules/,$(addsuffix .wasm,$(WModules)))
 TAGS_TARGET := \
 	$(shell find src -path 'src/modules' -prune -o -name '*.[ch]' -print) \
 	$(shell find wamr/core -name '*.[ch]' -print)
-WTargets := $(addprefix bin/modules/,$(addsuffix .wasm,$(WModules)))
 
 all: \
 	TAGS \
@@ -58,39 +59,70 @@ femail/debian/debfemail: bin/debfemail
 femail/scratch/debfemail-st: bin/debfemail-st
 	install $< $@
 
-bin/femail: $(Sources) $(Headers)
+bin/femail: $(Sources) $(Deps) $(Headers) 
 	$(CC) -DAPP_NAME="\"Femail Mail System\"" \
 	-DVERSION_PATCH=$(VERSION_PATCH) \
 	-DVERSION_UPDATE=$(VERSION_UPDATE) \
 	-DVERSION_RELEASE=$(VERSION_RELEASE) \
 	-DVERSION_TAG=$(VERSION_TAG) \
-	$(CFLAGS) -O2 $(Sources) $(LIBS) -o $@
+	$(CFLAGS) -O2 $(Sources) $(Deps) $(LIBS) -o $@
 
-bin/femail-st: $(Sources) $(Headers)
+bin/femail-st: $(Sources) $(Deps) $(Headers)
 	$(CC) -DAPP_NAME="\"Femail Mail System(Static)\"" \
 	-DVERSION_PATCH=$(VERSION_PATCH) \
 	-DVERSION_UPDATE=$(VERSION_UPDATE) \
 	-DVERSION_RELEASE=$(VERSION_RELEASE) \
 	-DVERSION_TAG=$(VERSION_TAG) \
-	$(CFLAGS) -O2 -static $(Sources) $(LIBS) -o $@
+	$(CFLAGS) -O2 -static $(Sources) $(Deps) $(LIBS) -o $@
 
-bin/debfemail: $(Sources) $(Headers)
+bin/debfemail: $(Sources) $(Deps) $(Headers)
 	$(CC) -DAPP_NAME="\"Femail Debug Mail System\"" \
 	-DVERSION_PATCH=$(VERSION_PATCH) \
 	-DVERSION_UPDATE=$(VERSION_UPDATE) \
 	-DVERSION_RELEASE=$(VERSION_RELEASE) \
 	-DVERSION_TAG=$(VERSION_TAG) \
-	$(CFLAGS) $(DEBUGFLAGS) -O1 $(Sources) $(LIBS) -o $@
+	$(CFLAGS) $(DEBUGFLAGS) -O1 $(Sources) $(Deps) $(LIBS) -o $@
 
-bin/debfemail-st: $(Sources) $(Headers)
+bin/debfemail-st: $(Sources) $(Deps) $(Headers)
 	$(CC) -DAPP_NAME="\"Femail Debug Mail System(Static)\"" \
 	-DVERSION_PATCH=$(VERSION_PATCH) \
 	-DVERSION_UPDATE=$(VERSION_UPDATE) \
 	-DVERSION_RELEASE=$(VERSION_RELEASE) \
 	-DVERSION_TAG=$(VERSION_TAG) \
-	$(CFLAGS) $(STDEBUGFLAGS) -O1 $(Sources) $(LIBS) -o $@
+	$(CFLAGS) $(STDEBUGFLAGS) -O1 $(Sources) $(Deps) $(LIBS) -o $@
 
-bin/modules/%.wasm: src/modules/%.c
+deps: bin/wamr/libiwasm.a
+
+bin/wamr/libiwasm.a: bin/wamr/Makefile
+	make -C bin/wamr -j$(shell nproc)
+
+bin/wamr/Makefile:
+	mkdir -p bin/wamr
+	cmake -Swamr -Bbin/wamr \
+		-DWAMR_BUILD_PLATFORM=linux \
+		-DWAMR_BUILD_INTERP=1 \
+		-DWAMR_BUILD_FAST_INTERP=1 \
+		-DWAMR_BUILD_AOT=0 \
+		-DWAMR_BUILD_JIT=0 \
+		-DWAMR_BUILD_FAST_JIT=0 \
+		-DWAMR_BUILD_LIBC_BUILTIN=0 \
+		-DWAMR_BUILD_LIBC_WASI=0 \
+		-DWAMR_BUILD_MULTI_MODULE=0 \
+		-DWAMR_BUILD_SHARED_MEMORY=0 \
+		-DWAMR_BUILD_THREAD_MGR=0 \
+		-DWAMR_BUILD_LIB_PTHREAD=0 \
+		-DWAMR_BUILD_GC=0 \
+		-DWAMR_BUILD_SIMD=1 \
+		-DWAMR_BUILD_REF_TYPES=1 \
+		-DWAMR_BUILD_TAIL_CALL=1 \
+		-DWAMR_BUILD_CUSTOM_NAME_SECTION=1 \
+		-DWAMR_BUILD_DUMP_CALL_STACK=1 \
+		-DWAMR_DISABLE_HW_BOUND_CHECK=1 \
+		-DWAMR_DISABLE_STACK_HW_BOUND_CHECK=1 \
+		-DWAMR_BUILD_SHRUNK_MEMORY=1 \
+		-DWAMR_BUILD_MEMORY64=0;
+
+bin/modules/%.wasm: src/modules/%/mod.c
 	$(WCC) $(WCFLAGS) $< -o $@
 
 TAGS: $(TAGS_TARGET)
@@ -115,4 +147,4 @@ femail/scratch/mail.failey.femail.crt:
 	install -T ca/mail.failey.femail.key femail/scratch/mail.failey.femail.key
 	install -T ca/mail.failey.femail.crt femail/scratch/mail.failey.femail.crt
 
-.PHONY: all up down logs certs
+.PHONY: all up down logs certs deps
