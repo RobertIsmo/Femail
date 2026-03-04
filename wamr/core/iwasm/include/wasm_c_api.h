@@ -1,6 +1,21 @@
 // WebAssembly C API
 
 /**
+* WAMR uses the same license as LLVM: the Apache 2.0
+* license with the LLVM exception. See the wamr/LICENSE
+* file for details.
+* 
+* Modifications licensed under the Femail license.
+* see the LICENSE file for details:
+* - Modified functions:
+*   - wasm_val_ptr()
+*   Copyright (c) 2026 Robert Ismo
+* 
+* The original Apache License 2.0 terms apply to the
+* Apache-licensed portions of this file.
+*/
+
+/**
  * @file   wasm_c_api.h
  *
  * @brief  This file defines the WebAssembly C APIs
@@ -881,7 +896,7 @@ static inline void* wasm_val_ptr(const wasm_val_t* val) {
 #if UINTPTR_MAX == UINT32_MAX
   return (void*)(intptr_t)val->of.i32;
 #elif UINTPTR_MAX == UINT64_MAX
-  return (void*)(intptr_t)val->of.i64;
+  return (void*)val->of.i64;
 #endif
 }
 

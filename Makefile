@@ -32,9 +32,10 @@ Deps := \
 	bin/wamr/libiwasm.a
 
 WTargets := $(addprefix bin/modules/,$(addsuffix .wasm,$(WModules)))
+WAMR_SOURCE := $(shell find wamr/core -name '*.[ch]' -print)
 TAGS_TARGET := \
 	$(shell find src -path 'src/modules' -prune -o -name '*.[ch]' -print) \
-	$(shell find wamr/core -name '*.[ch]' -print)
+	$(WAMR_SOURCE)
 
 all: \
 	TAGS \
@@ -96,7 +97,7 @@ deps: bin/wamr/libiwasm.a
 bin/wamr/libiwasm.a: bin/wamr/Makefile
 	make -C bin/wamr -j$(shell nproc)
 
-bin/wamr/Makefile:
+bin/wamr/Makefile: $(WAMR_SOURCE)
 	mkdir -p bin/wamr
 	cmake -Swamr -Bbin/wamr \
 		-DWAMR_BUILD_PLATFORM=linux \
