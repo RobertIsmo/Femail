@@ -8,3 +8,5 @@ bin/wamr
 *.crt
 *.key
 *.csr
+femail/debian/modules
+femail/scratch/modules
