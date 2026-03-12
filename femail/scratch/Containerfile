@@ -4,5 +4,6 @@ copy ./mail.failey.femail.key /usr/local/share/ca-certificates/mail.failey.femai
 copy ./mail.failey.femail.crt /usr/local/share/ca-certificates/mail.failey.femail.crt
 
 copy ./debfemail-st /usr/sbin/femail
+copy ./modules /usr/share/femail/modules
 
 cmd ["/usr/sbin/femail"]

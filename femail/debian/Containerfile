@@ -9,6 +9,7 @@ copy ./mail.mailey.femail.key /usr/local/share/ca-certificates/mail.mailey.femai
 copy ./mail.mailey.femail.crt /usr/local/share/ca-certificates/mail.mailey.femail.crt
 
 copy ./debfemail /usr/sbin/femail
+copy ./modules /usr/share/femail/modules
 
 cmd ["/usr/sbin/femail"]
 
